@@ -1,0 +1,393 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { MenuItem, Category } from './types';
+
+export const INITIAL_CATEGORIES: Category[] = [
+  { id: 'burgers', name: 'Burgers', iconName: 'Flame' },
+  { id: 'pizzas', name: 'Pizzas', iconName: 'Pizza' },
+  { id: 'sandwiches', name: 'Sandwiches', iconName: 'Sandwich' },
+  { id: 'desserts', name: 'Cakes & Desserts', iconName: 'Cake' },
+  { id: 'hot_drinks', name: 'Hot Brews', iconName: 'Coffee' },
+  { id: 'cold_drinks', name: 'Chilled Drinks', iconName: 'CupSoda' },
+  { id: 'sides', name: 'Sides', iconName: 'Beef' }
+];
+
+export const INITIAL_MENU_ITEMS: MenuItem[] = [
+  // --- BURGERS ---
+  {
+    id: 'b1',
+    name: 'Wow Signature Smasher',
+    description: 'Double Angus beef patties, melted aged cheddar, crispy shallots, smokey maple bacon, and our secret house special WOW glaze on an artisanal toasted brioche bun.',
+    price: 850.00,
+    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=600',
+    category: 'burgers',
+    ingredients: ['Double Angus Beef Patties', 'Aged Cheddar Cheese', 'Crispy Shallots', 'Smokey Maple Bacon', 'WOW Glaze', 'Toasted Brioche Bun'],
+    calories: 840,
+    prepTime: '8-10 min',
+    spicyLevel: 0,
+    isPopular: true,
+    isVegetarian: false
+  },
+  {
+    id: 'b2',
+    name: 'Spicy Lava Inferno Burger',
+    description: 'Gourmet smashed beef patty, pepper jack cheese, crispy fried jalapenos, and a fiery ghost-pepper chipotle cream sauce. Hot and legendary.',
+    price: 780.00,
+    image: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&q=80&w=600',
+    category: 'burgers',
+    ingredients: ['Angus Beef Smashed Patty', 'Pepper Jack Cheese', 'Fried Jalapenos', 'Pickled Red Onions', 'Ghost Pepper Cream Sauce', 'Chipotle Oil'],
+    calories: 780,
+    prepTime: '6-8 min',
+    spicyLevel: 3,
+    isPopular: false,
+    isVegetarian: false
+  },
+  {
+    id: 'b3',
+    name: 'Crispy Truffle Avocad-Oh!',
+    description: 'Crispy premium chicken breast fillet, fresh avocado mash, rocket greens, and house-blended black truffle garlic aioli, nested in an organic charcoal bun.',
+    price: 880.00,
+    image: 'https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&q=80&w=600',
+    category: 'burgers',
+    ingredients: ['Crispy Chicken Breast Fillet', 'Organic Avocado Mash', 'Wild Rocket Greens', 'Black Truffle Garlic Aioli', 'Pickles', 'Charcoal Artisanal Bun'],
+    calories: 690,
+    prepTime: '8-11 min',
+    spicyLevel: 1,
+    isPopular: true,
+    isVegetarian: false
+  },
+  {
+    id: 'b4',
+    name: 'The Green Garden Meadow',
+    description: 'Handcrafted grilled plant-based patty, smoke-infused vegan gouda, heirloom tomatoes, crunchy butterhead lettuce, and house herb-veganaise.',
+    price: 750.00,
+    image: 'https://images.unsplash.com/photo-1525059696034-4967a8e1dca2?auto=format&fit=crop&q=80&w=600',
+    category: 'burgers',
+    ingredients: ['Plant-Based Beyond Patty', 'Vegan Gouda Cheese', 'Heirloom Tomato', 'Butterhead Lettuce', 'House Herb-Veganaise', 'Gluten-Free Seeded Bun'],
+    calories: 520,
+    prepTime: '7-9 min',
+    spicyLevel: 0,
+    isPopular: false,
+    isVegetarian: true
+  },
+  {
+    id: 'b5',
+    name: 'The Golden Truffle Brie Smasher',
+    description: 'Double dry-aged Angus beef smash patties smothered in melted French cream Brie, caramelized sweet onions, wild truffle honey, and crispy sage on a golden brioche bun.',
+    price: 980.00,
+    image: 'https://images.unsplash.com/photo-1594212699903-ec8a3cee50f6?auto=format&fit=crop&q=80&w=600',
+    category: 'burgers',
+    ingredients: ['Double Angus Smashed Beef', 'Melting Cream Brie', 'Caramelized Sweet Onions', 'Wild Truffle Honey', 'Crispy Toasted Sage', 'Golden Brioche Bun'],
+    calories: 890,
+    prepTime: '9-12 min',
+    spicyLevel: 0,
+    isPopular: true,
+    isVegetarian: false
+  },
+
+  // --- PIZZAS ---
+  {
+    id: 'p1',
+    name: 'The Truffle Mushroom Feast',
+    description: 'Stone-baked sourdough crust topped with wild woodland porcini mushrooms, rich black truffle crema, fresh fior di latte mozzarella, baby arugula, and extra virgin olive oil.',
+    price: 1200.00,
+    image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&q=80&w=600',
+    category: 'pizzas',
+    ingredients: ['Sourdough Pizza Base', 'Porcini & Cremini Mushrooms', 'Black Truffle Crema', 'Fior de Latte Mozzarella', 'Baby Rocket Greens'],
+    calories: 740,
+    prepTime: '10-12 min',
+    spicyLevel: 0,
+    isPopular: true,
+    isVegetarian: true
+  },
+  {
+    id: 'p2',
+    name: 'Fiery Inferno Salami Pizza',
+    description: 'San Marzano tomato base, gourmet spicy Calabrian salami, fresh buffalo mozzarella, pickled hand-cut red chillies, and a rich drizzle of hot organic chili-infused honey.',
+    price: 1100.00,
+    image: 'https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?auto=format&fit=crop&q=80&w=600',
+    category: 'pizzas',
+    ingredients: ['San Marzano Tomato Sauce', 'Spicy Calabrian Salami', 'Fresh Buffalo Mozzarella', 'Pickled Red Chillies', 'Hot Chili-Infused Honey'],
+    calories: 820,
+    prepTime: '8-10 min',
+    spicyLevel: 2,
+    isPopular: false,
+    isVegetarian: false
+  },
+  {
+    id: 'p3',
+    name: 'Aged Garlic Prosciutto Pizza',
+    description: 'Thin, crispy hand-stretched sourdough coated in roasted garlic oil, layered with thin prosciutto di Parma, ripe cherry tomatoes, shaved pecorino cheese, and aromatic fresh basil.',
+    price: 1300.00,
+    image: 'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&q=80&w=600',
+    category: 'pizzas',
+    ingredients: ['Sourdough Crust', 'Prosciutto di Parma', 'Garlic Confit Spread', 'Sun-Ripened Cherry Tomatoes', 'Artisanal Pecorino Romano', 'Fresh Sweet Basil'],
+    calories: 790,
+    prepTime: '9-11 min',
+    spicyLevel: 0,
+    isPopular: true,
+    isVegetarian: false
+  },
+
+  // --- SANDWICHES ---
+  {
+    id: 'sw1',
+    name: 'Ultimate Pastrami Rye Melt',
+    description: 'Twelve-hour smoked beef pastrami piled high on toasted dark rye sourdough, with warm Swiss Emmental cheese, homemade sauerkraut, and hot mustard Russian dressing.',
+    price: 680.00,
+    image: 'https://images.unsplash.com/photo-1521390188846-e2a3a97453a0?auto=format&fit=crop&q=80&w=600',
+    category: 'sandwiches',
+    ingredients: ['12-Hour Smoked Beef Pastrami', 'Dark Sourdough Rye Bread', 'Swiss Emmental Cheese', 'Homemade Sour Kraut', 'Hot Russian Mustard Sauce'],
+    calories: 710,
+    prepTime: '6-8 min',
+    spicyLevel: 1,
+    isPopular: true,
+    isVegetarian: false
+  },
+  {
+    id: 'sw2',
+    name: 'Avocado Caprese Ciabatta',
+    description: 'Fresh warm house-baked ciabatta filled with ripe Haas avocado mash, organic basil pesto, heirloom juicy tomatoes, fresh buffalo mozzarella, and premium balsamic glaze.',
+    price: 580.00,
+    image: 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&q=80&w=600',
+    category: 'sandwiches',
+    ingredients: ['House-Baked Ciabatta', 'Haas Avocado Mash', 'Pesto Genovese', 'Heirloom Tomatoes', 'Creamy Buffalo Mozzarella', 'Modena Balsamic Glaze'],
+    calories: 490,
+    prepTime: '4-6 min',
+    spicyLevel: 0,
+    isPopular: false,
+    isVegetarian: true
+  },
+  {
+    id: 'sw3',
+    name: 'Buttermilk Buffalo Club',
+    description: 'Super crunchy double-dipped buttermilk fried chicken breast, drenched in tangy buffalo sauce, layered with hickory-smoked bacon, melted Swiss, and garlic herb ranch on country sourdough.',
+    price: 650.00,
+    image: 'https://images.unsplash.com/photo-1567234669003-dce7a7a88821?auto=format&fit=crop&q=80&w=600',
+    category: 'sandwiches',
+    ingredients: ['Buttermilk Fried Chicken', 'Country Sourdough Bread', 'Hickory-Smoked Bacon', 'Tangy Buffalo Sauce', 'Garlic Herb Ranch', 'Swiss Cheese'],
+    calories: 830,
+    prepTime: '7-9 min',
+    spicyLevel: 2,
+    isPopular: true,
+    isVegetarian: false
+  },
+
+  // --- DESSERTS & CAKES ---
+  {
+    id: 'd1',
+    name: 'Chocolate Lava Fondant',
+    description: 'A rich single-origin warm Belgian dark chocolate cake with a molten chocolate center. Paired elegantly with a dollop of fresh vanilla bean Chantilly cream.',
+    price: 350.00,
+    image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&q=80&w=600',
+    category: 'desserts',
+    ingredients: ['Belgian Callebaut Dark Chocolate', 'Gourmet French Butter', 'Organic Eggs', 'Vanilla Bean Chantilly Cream', 'Fresh Raspberries'],
+    calories: 512,
+    prepTime: '5-7 min',
+    spicyLevel: 0,
+    isPopular: true,
+    isVegetarian: true
+  },
+  {
+    id: 'd2',
+    name: 'San Sebastian Burnt Cheesecake',
+    description: 'Baked at high heat to achieve a deeply caramelized dark exterior and an incredibly velvety, oozing creamy center. Drizzled with warm premium milk chocolate.',
+    price: 420.00,
+    image: 'https://images.unsplash.com/photo-1524351199679-46cddf530c04?auto=format&fit=crop&q=80&w=600',
+    category: 'desserts',
+    ingredients: ['Double Cream Cheese', 'Organic Sugar', 'Belgian Milk Chocolate Drizzle', 'Vanilla Caviar Extract'],
+    calories: 580,
+    prepTime: '3-4 min',
+    spicyLevel: 0,
+    isPopular: true,
+    isVegetarian: true
+  },
+  {
+    id: 'd3',
+    name: 'Red Velvet Crown Royal',
+    description: 'A masterpiece layered red velvet cake infused with rich luxury cocoa, frosted with premium sweet cream cheese frosting, and styled with white chocolate shaving crown curls.',
+    price: 400.00,
+    image: 'https://images.unsplash.com/photo-1586985289688-ca9cf4993ec0?auto=format&fit=crop&q=80&w=600',
+    category: 'desserts',
+    ingredients: ['Premium Dutch Cocoa Powder', 'Gourmet Cream Cheese Frosting', 'Grated White Chocolate Curls', 'Sweet Vanilla Bean Infusion'],
+    calories: 490,
+    prepTime: '2-3 min',
+    spicyLevel: 0,
+    isPopular: false,
+    isVegetarian: true
+  },
+  {
+    id: 'd4',
+    name: 'Salted Caramel Pecan Tart',
+    description: 'Crispy buttery shortcrust pastry shell filled with warm house-crafted oozing salted caramel, loaded with toasted Georgia pecans, and finished with a pinch of Atlantic sea salt.',
+    price: 380.00,
+    image: 'https://images.unsplash.com/photo-1508737858941-824ec2d3a54e?auto=format&fit=crop&q=80&w=600',
+    category: 'desserts',
+    ingredients: ['Buttery Tart Shortcrust', 'Hand-Crafted Salted Caramel', 'Fresh Toasted Georgia Pecans', 'Fleur de Sel (Sea Salt)'],
+    calories: 460,
+    prepTime: '3-5 min',
+    isPopular: false,
+    isVegetarian: true
+  },
+  {
+    id: 'd5',
+    name: 'Pistachio Crumble Donut Stack',
+    description: 'Soft artisanal brioche donut hand-glazed in real pistachio extract, drizzled with white chocolate, and topped with crunchy roasted Sicilian pistachio crumbles.',
+    price: 250.00,
+    image: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&q=80&w=600',
+    category: 'desserts',
+    ingredients: ['Brioche Donut Dough', 'Glaze with Sicilian Pistachio Paste', 'Callebaut White Chocolate drizzle', 'Chopped Roasted Pistachios'],
+    calories: 400,
+    prepTime: '2-3 min',
+    spicyLevel: 0,
+    isPopular: false,
+    isVegetarian: true
+  },
+
+  // --- HOT BREWS ---
+  {
+    id: 'h1',
+    name: 'Signature Pistachio Latte',
+    description: 'Gourmet double shot of single-origin espresso with velvet steamed whole milk, infused with house organic Sicilian green pistachio paste, and styled with roasted pistachio dust.',
+    price: 180.00,
+    image: 'https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&q=80&w=600',
+    category: 'hot_drinks',
+    ingredients: ['Double shot Single-Origin Espresso', 'Steamed Organic Milk', 'Sicilian Green Pistachio Paste', 'Crushed Toasted Pistachios'],
+    calories: 220,
+    prepTime: '3-4 min',
+    spicyLevel: 0,
+    isPopular: true,
+    isVegetarian: true
+  },
+  {
+    id: 'h2',
+    name: 'Vanilla Bean Golden Cappuccino',
+    description: 'Classic velvety cappuccino crafted with rich premium espresso, house-steamed vanilla pod milk, topped with fine microfoam and edible 24K gold flakes.',
+    price: 200.00,
+    image: 'https://images.unsplash.com/photo-1572442388796-11668a720eb9?auto=format&fit=crop&q=80&w=600',
+    category: 'hot_drinks',
+    ingredients: ['Organic Espresso Blend', 'Madagascar Vanilla Pod Infusion', 'Velvet Steamed Whole Milk', 'Edible 24K Gold Flake Sprinkles'],
+    calories: 180,
+    prepTime: '2-4 min',
+    spicyLevel: 0,
+    isPopular: false,
+    isVegetarian: true
+  },
+  {
+    id: 'h3',
+    name: 'Gourmet Sea-Salt Hot Chocolate',
+    description: 'Warm, thick Belgian dark chocolate melted meticulously into whole organic dairy milk, topped with charred gourmet house-made marshmallow cream fluff and fleur de sel.',
+    price: 150.00,
+    image: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&q=80&w=600',
+    category: 'hot_drinks',
+    ingredients: ['Melted Belgian Dark Chocolate', 'Whole Organic Dairy Milk', 'Torched House Marshmallow Cream', 'Sprinkle of Fleur de Sel (Sea Salt)'],
+    calories: 310,
+    prepTime: '3-4 min',
+    spicyLevel: 0,
+    isPopular: true,
+    isVegetarian: true
+  },
+
+  // --- CHILLED DRINKS ---
+  {
+    id: 'c1',
+    name: 'Velvety Premium Vanilla Shake',
+    description: 'Thick luxurious hand-spun milkshake made with award-winning authentic Madagascan vanilla bean gelato, topped with sweet Chantilly whipped cream and golden shimmer dust.',
+    price: 240.00,
+    image: 'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?auto=format&fit=crop&q=80&w=600',
+    category: 'cold_drinks',
+    ingredients: ['Madagascan Vanilla Bean Gelato', 'Organic Farm Whole Milk', 'Chantilly Cream Cloud', 'Edible Golden Shimmer', 'Luxardo Maraschino Cherry'],
+    calories: 450,
+    prepTime: '3-4 min',
+    spicyLevel: 0,
+    isPopular: true,
+    isVegetarian: true
+  },
+  {
+    id: 'c2',
+    name: 'Frosted Nitro Cold Brew',
+    description: 'Smooth, 24-hour nitrogenated cold brew coffee, lightly sweetened with liquid raw Demerara sugar and finished with sweet rich vanilla-infused cold milk foam.',
+    price: 160.00,
+    image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&q=80&w=600',
+    category: 'cold_drinks',
+    ingredients: ['Nitro Hand-Infused House Espresso', 'Raw Demerara Sugar Syrup', 'Vanilla Bean Infused Cold Foam', 'Organic Cocoa Dusting'],
+    calories: 140,
+    prepTime: '2-3 min',
+    spicyLevel: 0,
+    isPopular: false,
+    isVegetarian: true
+  },
+  {
+    id: 'c3',
+    name: 'Electric Blue Coconut Mocktail',
+    description: 'An electrical refreshing blend of organic coconut water, gourmet non-alcoholic blue curaçao syrup, hand-squeezed lime juice, and sparkling mineral water, served over crushed ice.',
+    price: 250.00,
+    image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&q=80&w=600',
+    category: 'cold_drinks',
+    ingredients: ['Fresh Coconut Water', 'Non-Alcoholic Blue Curaçao Syrup', 'Lime Juice', 'Premium Sparkling Soda Water', 'Mint Leaf Sprig'],
+    calories: 95,
+    prepTime: '2-3 min',
+    spicyLevel: 0,
+    isPopular: true,
+    isVegetarian: true
+  },
+  {
+    id: 'c4',
+    name: 'Wildberry Hibiscus Iced Tea',
+    description: 'Chilled organic red hibiscus flower brew hand-mixed with pureed forest wild berries, fresh garden mint leaves, fresh lime squeeze, and organic raw wildflower honey.',
+    price: 170.00,
+    image: 'https://images.unsplash.com/photo-1497534446932-c925b458314e?auto=format&fit=crop&q=80&w=600',
+    category: 'cold_drinks',
+    ingredients: ['Organic Egyptian Hibiscus Flower Brew', 'Rich Pureed Forest Wildberries', 'Fresh Lime Wedges', 'Organic Wildflower Honey', 'Garden Mint'],
+    calories: 120,
+    prepTime: '2-3 min',
+    spicyLevel: 0,
+    isPopular: false,
+    isVegetarian: true
+  },
+
+  // --- SIDES ---
+  {
+    id: 's1',
+    name: 'Golden Truffle Sea Salt Fries',
+    description: 'Hand-cut russet potatoes fried to crisp perfection, drizzled with premium white truffle oil, shaved Parmigiano-Reggiano, and fresh chopped parsley.',
+    price: 280.00,
+    image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&q=80&w=600',
+    category: 'sides',
+    ingredients: ['Russet Potatoes', 'White Truffle Oil', 'Parmigiano-Reggiano Cheese', 'Fleur de Sel (Sea Salt)', 'Fresh Parsley'],
+    calories: 380,
+    prepTime: '4-5 min',
+    isPopular: true,
+    isVegetarian: true
+  },
+  {
+    id: 's2',
+    name: 'Loaded Volcano Cheese Fries',
+    description: 'Crisp dynamic waffle-cut fries drowned in our signature melty cheddar cheese dip, showered with crispy beef bacon crumbs, and fiery pickled jalapenos.',
+    price: 320.00,
+    image: 'https://images.unsplash.com/photo-1585109649139-366815a0d713?auto=format&fit=crop&q=80&w=600',
+    category: 'sides',
+    ingredients: ['Waffle Potatoes', 'House Cheddar Dip', 'Crispy Beef Bacon Bites', 'Chives', 'Pickled Jalapeno Rounds'],
+    calories: 590,
+    prepTime: '5-7 min',
+    spicyLevel: 1,
+    isPopular: false,
+    isVegetarian: false
+  },
+  {
+    id: 's3',
+    name: 'Smokey Garlic Onion Rings',
+    description: 'Giant sweet onions sliced thick, submerged in our signature craft beer batter, panko crusted, and fried till golden-crackly. Served with smoky garlic dip.',
+    price: 220.00,
+    image: 'https://images.unsplash.com/photo-1639024471283-2bc7b3c6a267?auto=format&fit=crop&q=80&w=600',
+    category: 'sides',
+    ingredients: ['Thick-Cut Sweet Onions', 'Gourmet Beer-Batter', 'Crispy Panko breading', 'Smoky Garlic Dip Sauce'],
+    calories: 310,
+    prepTime: '3-4 min',
+    isPopular: false,
+    isVegetarian: true
+  }
+];

@@ -1,0 +1,6 @@
+{
+  "name": "Wow Burger",
+  "description": "A minimalist, responsive mobile-first digital menu and admin content management interface for Wow Burger.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
