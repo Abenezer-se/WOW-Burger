@@ -24,7 +24,11 @@ import {
   Send, 
   Heart, 
   Mail, 
-  Facebook 
+  Facebook,
+  Home,
+  Utensils,
+  CupSoda,
+  Sparkles
 } from 'lucide-react';
 
 const STATIC_INITIAL_COMMENTS: CommentFeedback[] = [
@@ -48,6 +52,7 @@ export default function App() {
   // Navigation View Router
   const [currentView, setCurrentView] = useState<AppView>('user-menu');
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   // Global Theme Toggling System (Defaults to Dark Mode per Wow Burger brand guidelines)
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
@@ -200,7 +205,7 @@ export default function App() {
   const globalBg = isDarkMode ? 'bg-[#121212] text-white' : 'bg-[#F9FAFB] text-gray-900';
 
   return (
-    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-300 selection:bg-[#E63946] selection:text-white ${globalBg}`} id="wow-burger-app">
+    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-300 selection:bg-[#E63946] selection:text-white pb-16 md:pb-0 ${globalBg}`} id="wow-burger-app">
       
       {/* Universal Header with theme toggles, fav counts, and views */}
       <Header 
@@ -234,6 +239,8 @@ export default function App() {
                 favoriteIds={favoriteIds}
                 onToggleFavorite={handleToggleFavorite}
                 isDarkMode={isDarkMode}
+                selectedCategory={selectedCategory}
+                onSelectCategory={setSelectedCategory}
               />
             </motion.div>
           )}
@@ -403,6 +410,110 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* Mobile Bottom Navigation Bar (Visual Sticky Helper) */}
+      <div 
+        className={`fixed bottom-0 left-0 right-0 z-40 border-t-2 flex justify-around py-2 md:hidden shadow-lg ${
+          isDarkMode 
+            ? 'bg-[#1D1D1D] text-gray-400 border-black' 
+            : 'bg-white text-gray-600 border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]'
+        }`}
+        id="mobile-bottom-nav"
+      >
+        <button
+          onClick={() => {
+            setCurrentView('user-menu');
+            setSelectedCategory('all');
+            setSelectedItem(null);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className={`flex flex-col items-center gap-1 text-[10px] font-black uppercase tracking-wider transition-colors py-1 px-3 ${
+            currentView === 'user-menu' && selectedCategory === 'all'
+              ? 'text-[#E63946]'
+              : isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'
+          }`}
+          id="m-nav-home"
+        >
+          <Home className="h-4 w-4" />
+          <span>Home</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setCurrentView('user-menu');
+            setSelectedCategory('burgers');
+            setSelectedItem(null);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className={`flex flex-col items-center gap-1 text-[10px] font-black uppercase tracking-wider transition-colors py-1 px-3 ${
+            currentView === 'user-menu' && (selectedCategory === 'burgers' || selectedCategory === 'pizzas' || selectedCategory === 'sandwiches')
+              ? 'text-[#E63946]'
+              : isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'
+          }`}
+          id="m-nav-food"
+        >
+          <Utensils className="h-4 w-4" />
+          <span>Food</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setCurrentView('user-menu');
+            setSelectedCategory('cold_drinks');
+            setSelectedItem(null);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className={`flex flex-col items-center gap-1 text-[10px] font-black uppercase tracking-wider transition-colors py-1 px-3 ${
+            currentView === 'user-menu' && (selectedCategory === 'cold_drinks' || selectedCategory === 'hot_drinks')
+              ? 'text-[#E63946]'
+              : isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'
+          }`}
+          id="m-nav-drinks"
+        >
+          <CupSoda className="h-4 w-4" />
+          <span>Drinks</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setCurrentView('user-menu');
+            setSelectedCategory('special');
+            setSelectedItem(null);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className={`flex flex-col items-center gap-1 text-[10px] font-black uppercase tracking-wider transition-colors py-1 px-3 ${
+            currentView === 'user-menu' && selectedCategory === 'special'
+              ? 'text-[#E63946]'
+              : isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'
+          }`}
+          id="m-nav-special"
+        >
+          <Sparkles className="h-4 w-4" />
+          <span>Special</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setCurrentView('favorites');
+            setSelectedItem(null);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className={`relative flex flex-col items-center gap-1 text-[10px] font-black uppercase tracking-wider transition-colors py-1 px-3 ${
+            currentView === 'favorites'
+              ? 'text-[#E63946]'
+              : isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'
+          }`}
+          id="m-nav-favorites"
+        >
+          <Heart className="h-4 w-4" />
+          <span>Favorites</span>
+          {favoriteIds.length > 0 && (
+            <span className="absolute -top-0.5 right-2 flex h-4 w-4 items-center justify-center rounded-full bg-[#E63946] border border-black text-[8px] font-black text-white">
+              {favoriteIds.length}
+            </span>
+          )}
+        </button>
+      </div>
     </div>
   );
 }

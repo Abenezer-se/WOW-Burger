@@ -21,7 +21,10 @@ import {
   Cake,
   Coffee,
   Heart,
-  Star
+  Star,
+  X,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { MenuItem, Category } from '../types';
 
@@ -32,6 +35,8 @@ interface MenuGridProps {
   favoriteIds?: string[];
   onToggleFavorite?: (itemId: string) => void;
   isDarkMode?: boolean;
+  selectedCategory?: string;
+  onSelectCategory?: (id: string) => void;
 }
 
 // Icon helper map to render category icons dynamically
@@ -46,17 +51,78 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   Coffee: <Coffee className="h-4 w-4" />
 };
 
+// Onboarding Highlights Data
+const ONBOARDING_SLIDES = [
+  {
+    title: "🍔 Welcome to Addis' Finest Smashed Burgers!",
+    description: "Every single-origin patty is sourced locally, masterfully smashed, and served on artisanal toasted brioche buns. Bite into ultimate perfection!",
+    badge: "100% Angus Beef",
+    bgColor: "bg-red-500/5",
+    accentColor: "text-[#E63946]",
+    image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=600"
+  },
+  {
+    title: "🍕 Handcrafted Sourdough Stone-Baked Pizzas",
+    description: "We slow-ferment our sourdough for 48 hours for that ultimate airy, blistered crust, loaded with gooey cheese and premium toppings.",
+    badge: "Sourdough Sensation",
+    bgColor: "bg-amber-500/5",
+    accentColor: "text-[#FFAE19]",
+    image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&q=80&w=600"
+  },
+  {
+    title: "🧉 Infused Chilled Teas & Local Brews",
+    description: "Quench your thirst with our wild-harvested iced floral teas and rich single-origin Sidama coffee brews, crafted freshly at our Bole branch.",
+    badge: "100% Sidama Sourced",
+    bgColor: "bg-cyan-500/5",
+    accentColor: "text-[#00E5FF]",
+    image: "https://images.unsplash.com/photo-1497515114629-f71d768fd07c?auto=format&fit=crop&q=80&w=600"
+  },
+  {
+    title: "⭐ Rate & Inspect Secret Recipes!",
+    description: "Click any item to inspect its exact culinary details, view prep times, and rate it. Share your feedback directly to our chefs!",
+    badge: "Interactive Gourmet Guide",
+    bgColor: "bg-orange-500/5",
+    accentColor: "text-[#F4A261]",
+    image: "https://images.unsplash.com/photo-1577219491135-ce391730fb2c?auto=format&fit=crop&q=80&w=600"
+  }
+];
+
 export default function MenuGrid({ 
   items, 
   categories, 
   onSelectProduct,
   favoriteIds = [],
   onToggleFavorite,
-  isDarkMode = true
+  isDarkMode = true,
+  selectedCategory: propCategory,
+  onSelectCategory
 }: MenuGridProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [internalCategory, setInternalCategory] = useState('all');
+  const selectedCategory = propCategory !== undefined ? propCategory : internalCategory;
+  const setSelectedCategory = onSelectCategory || setInternalCategory;
+
   const [dietFilter, setDietFilter] = useState<'all' | 'veg' | 'popular' | 'spicy'>('all');
+
+  // Slidable Onboarding States
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    try {
+      const saved = localStorage.getItem('wow-burger-onboarding');
+      return saved !== 'dismissed';
+    } catch {
+      return true;
+    }
+  });
+
+  const handleDismissOnboarding = () => {
+    setShowOnboarding(false);
+    try {
+      localStorage.setItem('wow-burger-onboarding', 'dismissed');
+    } catch (e) {
+      // Ignored
+    }
+  };
 
   // Multi-theme category configurations
   const getCategoryTheme = (id: string, dark: boolean) => {
@@ -79,7 +145,7 @@ export default function MenuGrid({
         bgActiveHover: dark 
           ? 'bg-[#1A1A1A] border-[#E63946] text-white hover:bg-[#252525] shadow-[2px_2px_0px_0px_#E63946]'
           : 'bg-white border-[#E63946] text-gray-800 hover:bg-gray-100 shadow-[2px_2px_0px_0px_#E63946]',
-        cardClasses: 'border-[#E63946] shadow-[4px_4px_0px_0px_#E63946] hover:shadow-[6px_6px_0px_0px_#E63946]',
+        cardClasses: 'border-[#E63946] shadow-[2px_2px_0px_0px_#E63946] sm:shadow-[4px_4px_0px_0px_#E63946] hover:shadow-[3px_3px_0px_0px_#E63946] sm:hover:shadow-[6px_6px_0px_0px_#E63946]',
         imageBorder: 'border-b-[2.5px] border-[#E63946]',
         textAccent: 'text-[#E63946]',
         textAccentHover: 'group-hover:text-[#E63946]',
@@ -93,7 +159,7 @@ export default function MenuGrid({
         bgActiveHover: dark 
           ? 'bg-[#1A1A1A] border-[#FF4747] text-white hover:bg-[#252525] shadow-[2px_2px_0px_0px_#FF4747]'
           : 'bg-white border-[#FF4747] text-gray-800 hover:bg-gray-100 shadow-[2px_2px_0px_0px_#FF4747]',
-        cardClasses: 'border-[#FF4747] shadow-[4px_4px_0px_0px_#FF4747] hover:shadow-[6px_6px_0px_0px_#FF4747]',
+        cardClasses: 'border-[#FF4747] shadow-[2px_2px_0px_0px_#FF4747] sm:shadow-[4px_4px_0px_0px_#FF4747] hover:shadow-[3px_3px_0px_0px_#FF4747] sm:hover:shadow-[6px_6px_0px_0px_#FF4747]',
         imageBorder: 'border-b-[2.5px] border-[#FF4747]',
         textAccent: 'text-[#FF4747]',
         textAccentHover: 'group-hover:text-[#FF4747]',
@@ -107,7 +173,7 @@ export default function MenuGrid({
         bgActiveHover: dark 
           ? 'bg-[#1A1A1A] border-[#FFAE19] text-white hover:bg-[#252525] shadow-[2px_2px_0px_0px_#FFAE19]'
           : 'bg-white border-[#FFAE19] text-gray-800 hover:bg-gray-100 shadow-[2px_2px_0px_0px_#FFAE19]',
-        cardClasses: 'border-[#FFAE19] shadow-[4px_4px_0px_0px_#FFAE19] hover:shadow-[6px_6px_0px_0px_#FFAE19]',
+        cardClasses: 'border-[#FFAE19] shadow-[2px_2px_0px_0px_#FFAE19] sm:shadow-[4px_4px_0px_0px_#FFAE19] hover:shadow-[3px_3px_0px_0px_#FFAE19] sm:hover:shadow-[6px_6px_0px_0px_#FFAE19]',
         imageBorder: 'border-b-[2.5px] border-[#FFAE19]',
         textAccent: 'text-[#FFAE19]',
         textAccentHover: 'group-hover:text-[#FFAE19]',
@@ -121,7 +187,7 @@ export default function MenuGrid({
         bgActiveHover: dark 
           ? 'bg-[#1A1A1A] border-[#F4A261] text-white hover:bg-[#252525] shadow-[2px_2px_0px_0px_#F4A261]'
           : 'bg-white border-[#F4A261] text-gray-800 hover:bg-gray-100 shadow-[2px_2px_0px_0px_#F4A261]',
-        cardClasses: 'border-[#F4A261] shadow-[4px_4px_0px_0px_#F4A261] hover:shadow-[6px_6px_0px_0px_#F4A261]',
+        cardClasses: 'border-[#F4A261] shadow-[2px_2px_0px_0px_#F4A261] sm:shadow-[4px_4px_0px_0px_#F4A261] hover:shadow-[3px_3px_0px_0px_#F4A261] sm:hover:shadow-[6px_6px_0px_0px_#F4A261]',
         imageBorder: 'border-b-[2.5px] border-[#F4A261]',
         textAccent: 'text-[#F4A261]',
         textAccentHover: 'group-hover:text-[#F4A261]',
@@ -135,7 +201,7 @@ export default function MenuGrid({
         bgActiveHover: dark 
           ? 'bg-[#1A1A1A] border-[#FF4D80] text-white hover:bg-[#252525] shadow-[2px_2px_0px_0px_#FF4D80]'
           : 'bg-white border-[#FF4D80] text-gray-800 hover:bg-gray-100 shadow-[2px_2px_0px_0px_#FF4D80]',
-        cardClasses: 'border-[#FF4D80] shadow-[4px_4px_0px_0px_#FF4D80] hover:shadow-[6px_6px_0px_0px_#FF4D80]',
+        cardClasses: 'border-[#FF4D80] shadow-[2px_2px_0px_0px_#FF4D80] sm:shadow-[4px_4px_0px_0px_#FF4D80] hover:shadow-[3px_3px_0px_0px_#FF4D80] sm:hover:shadow-[6px_6px_0px_0px_#FF4D80]',
         imageBorder: 'border-b-[2.5px] border-[#FF4D80]',
         textAccent: 'text-[#FF4D80]',
         textAccentHover: 'group-hover:text-[#FF4D80]',
@@ -149,7 +215,7 @@ export default function MenuGrid({
         bgActiveHover: dark 
           ? 'bg-[#1A1A1A] border-[#D4A373] text-white hover:bg-[#252525] shadow-[2px_2px_0px_0px_#D4A373]'
           : 'bg-white border-[#D4A373] text-gray-800 hover:bg-gray-100 shadow-[2px_2px_0px_0px_#D4A373]',
-        cardClasses: 'border-[#D4A373] shadow-[4px_4px_0px_0px_#D4A373] hover:shadow-[6px_6px_0px_0px_#D4A373]',
+        cardClasses: 'border-[#D4A373] shadow-[2px_2px_0px_0px_#D4A373] sm:shadow-[4px_4px_0px_0px_#D4A373] hover:shadow-[3px_3px_0px_0px_#D4A373] sm:hover:shadow-[6px_6px_0px_0px_#D4A373]',
         imageBorder: 'border-b-[2.5px] border-[#D4A373]',
         textAccent: 'text-[#D4A373]',
         textAccentHover: 'group-hover:text-[#D4A373]',
@@ -163,12 +229,26 @@ export default function MenuGrid({
         bgActiveHover: dark 
           ? 'bg-[#1A1A1A] border-[#00E5FF] text-white hover:bg-[#252525] shadow-[2px_2px_0px_0px_#00E5FF]'
           : 'bg-white border-[#00E5FF] text-gray-800 hover:bg-gray-100 shadow-[2px_2px_0px_0px_#00E5FF]',
-        cardClasses: 'border-[#00E5FF] shadow-[4px_4px_0px_0px_#00E5FF] hover:shadow-[6px_6px_0px_0px_#00E5FF]',
+        cardClasses: 'border-[#00E5FF] shadow-[2px_2px_0px_0px_#00E5FF] sm:shadow-[4px_4px_0px_0px_#00E5FF] hover:shadow-[3px_3px_0px_0px_#00E5FF] sm:hover:shadow-[6px_6px_0px_0px_#00E5FF]',
         imageBorder: 'border-b-[2.5px] border-[#00E5FF]',
         textAccent: 'text-[#00E5FF]',
         textAccentHover: 'group-hover:text-[#00E5FF]',
         dividerClasses: 'border-t-2 border-[#00E5FF]/30',
         categoryBadgeBg: 'bg-cyan-95/35 border-[#00E5FF] text-cyan-600'
+      },
+      special: {
+        border: 'border-[#F4A261]',
+        text: 'text-[#F4A261]',
+        bgActive: 'bg-[#F4A261] border-black text-black shadow-[2px_2px_0px_0px_#E63946]',
+        bgActiveHover: dark 
+          ? 'bg-[#1A1A1A] border-[#F4A261] text-white hover:bg-[#252525] shadow-[2px_2px_0px_0px_#F4A261]'
+          : 'bg-white border-[#F4A261] text-gray-800 hover:bg-gray-100 shadow-[2px_2px_0px_0px_#F4A261]',
+        cardClasses: 'border-[#F4A261] shadow-[2px_2px_0px_0px_#F4A261] sm:shadow-[4px_4px_0px_0px_#F4A261] hover:shadow-[3px_3px_0px_0px_#F4A261] sm:hover:shadow-[6px_6px_0px_0px_#F4A261]',
+        imageBorder: 'border-b-[2.5px] border-[#F4A261]',
+        textAccent: 'text-[#F4A261]',
+        textAccentHover: 'group-hover:text-[#F4A261]',
+        dividerClasses: 'border-t-2 border-[#F4A261]/30',
+        categoryBadgeBg: 'bg-orange-95/40 border-[#F4A261] text-orange-500'
       }
     };
 
@@ -183,7 +263,8 @@ export default function MenuGrid({
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
       // 1. Category check
-      const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+      const matchesCategory = selectedCategory === 'all' || 
+                              (selectedCategory === 'special' ? item.isPopular : item.category === selectedCategory);
       
       // 2. Search Box check
       const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -227,6 +308,139 @@ export default function MenuGrid({
           <span>BOLE BRANCH SPECIAL</span>
         </div>
       </div>
+
+      {/* Onboarding Highlights Board */}
+      <AnimatePresence>
+        {showOnboarding && (
+          <motion.div
+            initial={{ opacity: 0, height: 0, y: -10 }}
+            animate={{ opacity: 1, height: 'auto', y: 0 }}
+            exit={{ opacity: 0, height: 0, y: -10 }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className={`mb-8 overflow-hidden rounded-2xl border-[3px] border-black p-4 sm:p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative ${
+              isDarkMode 
+                ? 'bg-[#1D1D1D] text-white' 
+                : 'bg-white text-gray-900 shadow-[4px_4px_0px_0px_#FF4D80]'
+            }`}
+            id="menu-onboarding-card"
+          >
+            {/* Quick Close Button */}
+            <button
+              onClick={handleDismissOnboarding}
+              className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-lg border-2 border-black bg-[#E63946] text-white hover:bg-red-650 transition-all active:scale-90 z-20"
+              id="onboarding-close-btn"
+              title="Dismiss Highlights"
+            >
+              <X className="h-4 w-4 stroke-[3]" />
+            </button>
+
+            <div className="grid gap-5 grid-cols-1 md:grid-cols-12 md:items-center relative">
+              {/* Left Column: Core content of the current slide */}
+              <div className="col-span-12 md:col-span-8 space-y-3.5 pr-0 md:pr-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded bg-[#E63946] border border-black px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-[1.5px_1.5px_0px_0px_rgba(0,0,0,1)]">
+                    {ONBOARDING_SLIDES[currentSlideIndex].badge}
+                  </span>
+                  <span className="text-[10px] font-bold font-mono uppercase tracking-wider text-[#F4A261]">
+                    Highlight {currentSlideIndex + 1} of {ONBOARDING_SLIDES.length}
+                  </span>
+                </div>
+
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentSlideIndex}
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-2"
+                  >
+                    <h3 className="font-sans text-base sm:text-xl font-black uppercase tracking-tight leading-tight">
+                      {ONBOARDING_SLIDES[currentSlideIndex].title}
+                    </h3>
+
+                    <p className={`text-xs sm:text-sm font-semibold leading-relaxed ${textMutedClass}`}>
+                      {ONBOARDING_SLIDES[currentSlideIndex].description}
+                    </p>
+                  </motion.div>
+                </AnimatePresence>
+
+                {/* Slider Controller Dots & Interactive Buttons */}
+                <div className="flex items-center gap-3 pt-1">
+                  {/* Previous Button */}
+                  <button
+                    onClick={() => {
+                      setCurrentSlideIndex((prev) => (prev === 0 ? ONBOARDING_SLIDES.length - 1 : prev - 1));
+                    }}
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg border-2 border-black transition-all active:scale-95 ${
+                      isDarkMode 
+                        ? 'bg-[#121212] text-white hover:bg-[#252525]' 
+                        : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                    }`}
+                    id="onboarding-prev-btn"
+                    title="Previous Slide"
+                  >
+                    <ChevronLeft className="h-4.5 w-4.5 stroke-[2.5]" />
+                  </button>
+
+                  {/* Progress Indicators (Dots) */}
+                  <div className="flex items-center gap-1.5" id="onboarding-dots">
+                    {ONBOARDING_SLIDES.map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setCurrentSlideIndex(idx)}
+                        className={`h-2.5 rounded-full transition-all border border-black ${
+                          currentSlideIndex === idx 
+                            ? 'w-6 bg-[#E63946]' 
+                            : 'w-2.5 bg-gray-400'
+                        }`}
+                        title={`Go to slide ${idx + 1}`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Next Button */}
+                  <button
+                    onClick={() => {
+                      setCurrentSlideIndex((prev) => (prev === ONBOARDING_SLIDES.length - 1 ? 0 : prev + 1));
+                    }}
+                    className="flex items-center gap-1.5 rounded-lg border-2 border-black bg-[#E63946] px-3 py-1 text-xs font-black uppercase tracking-wider text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-[#FF4747] transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+                    id="onboarding-next-btn"
+                    title="Next Slide"
+                  >
+                    <span>Next</span>
+                    <ChevronRight className="h-4 w-4 stroke-[3]" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Right Column: Dynamic high-quality food image mapping */}
+              <div className="col-span-12 md:col-span-4 flex items-center justify-center pt-2 md:pt-0 animate-fade-in">
+                <div className="relative w-full max-w-[240px] aspect-[4/3] rounded-2xl border-4 border-black overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-[#121212] group">
+                  <AnimatePresence mode="wait">
+                    <motion.img
+                      key={currentSlideIndex}
+                      initial={{ opacity: 0, scale: 0.94 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.94 }}
+                      transition={{ duration: 0.25 }}
+                      src={ONBOARDING_SLIDES[currentSlideIndex].image}
+                      alt={ONBOARDING_SLIDES[currentSlideIndex].badge}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      referrerPolicy="no-referrer"
+                    />
+                  </AnimatePresence>
+                  {/* Glowing label tag overlay */}
+                  <div className="absolute bottom-2 left-2 bg-[#E63946] border-2 border-black text-white text-[8px] font-black uppercase px-2 py-0.5 rounded shadow-[1.5px_1.5px_0px_0px_rgba(0,0,0,1)] flex items-center gap-1">
+                    <Sparkles className="h-2 w-2 text-white fill-current animate-pulse" />
+                    <span>Bole Masterpiece</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Control Panel: Search & Categories */}
       <div className="mb-10 space-y-5 rounded-2xl border-[3px] border-black p-5 shadow-[5px_5px_0px_0px_#E63946] relative overflow-hidden" id="menu-search-bar" style={{
@@ -276,6 +490,20 @@ export default function MenuGrid({
               >
                 <span>🍽️</span>
                 <span>All Eats</span>
+              </button>
+
+              {/* Special Option */}
+              <button
+                onClick={() => setSelectedCategory('special')}
+                className={`flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-black uppercase tracking-wider transition-all border-[2.5px] ${
+                  selectedCategory === 'special'
+                    ? getCategoryTheme('special', isDarkMode).bgActive
+                    : getCategoryTheme('special', isDarkMode).bgActiveHover
+                }`}
+                id="category-tab-special"
+              >
+                <span>⭐</span>
+                <span>Specials</span>
               </button>
 
               {categories.map((cat) => {
@@ -386,7 +614,7 @@ export default function MenuGrid({
         ) : (
           <motion.div 
             layout
-            className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+            className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-2 lg:grid-cols-3"
             id="gourmet-items-grid"
           >
             {filteredItems.map((item) => {
@@ -407,7 +635,7 @@ export default function MenuGrid({
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.2 }}
                   key={item.id}
-                  className={`group relative cursor-pointer overflow-hidden rounded-2xl border-[3px] transition-all duration-300 hover:-translate-y-1 ${cardBgClass} ${theme.cardClasses}`}
+                  className={`group relative cursor-pointer overflow-hidden rounded-xl sm:rounded-2xl border-2 sm:border-[3px] transition-all duration-300 hover:-translate-y-1 ${cardBgClass} ${theme.cardClasses}`}
                   id={`card-item-${item.id}`}
                   onClick={() => onSelectProduct(item)}
                 >
@@ -421,17 +649,18 @@ export default function MenuGrid({
                     />
 
                     {/* Left corner status tags */}
-                    <div className="absolute top-3 left-3 flex flex-col gap-1">
+                    <div className="absolute top-1.5 left-1.5 sm:top-3 sm:left-3 flex flex-col gap-0.5 sm:gap-1">
                       {item.isPopular && (
-                        <span className="flex items-center gap-1 rounded-lg bg-[#FF4747] border border-black px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-white shadow-sm">
-                          <TrendingUp className="h-3 w-3" />
-                          BEST SELLER
+                        <span className="flex items-center gap-0.5 sm:gap-1 rounded bg-[#FF4747] border border-black px-1 sm:px-2.5 py-0.5 sm:py-1 text-[7px] sm:text-[9px] font-black uppercase tracking-wider text-white shadow-sm">
+                          <TrendingUp className="h-2 w-2 sm:h-3 sm:w-3" />
+                          <span className="hidden xs:inline">BEST</span>
+                          <span className="inline xs:hidden">★</span>
                         </span>
                       )}
                       {item.isVegetarian && (
-                        <span className="flex items-center gap-1 rounded-lg bg-emerald-500 border border-black px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-white shadow-sm">
-                          <Leaf className="h-3 w-3 fill-white/10" />
-                          VEGGIE
+                        <span className="flex items-center gap-0.5 sm:gap-1 rounded bg-emerald-500 border border-black px-1 sm:px-2.5 py-0.5 sm:py-1 text-[7px] sm:text-[9px] font-black uppercase tracking-wider text-white shadow-sm">
+                          <Leaf className="h-2 w-2 sm:h-3 sm:w-3 fill-white/10" />
+                          VEG
                         </span>
                       )}
                     </div>
@@ -443,61 +672,67 @@ export default function MenuGrid({
                           e.stopPropagation();
                           onToggleFavorite(item.id);
                         }}
-                        className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-lg border-2 border-black bg-white text-[#E63946] shadow-sm transition-transform active:scale-90"
+                        className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded border border-black bg-white text-[#E63946] shadow-sm transition-transform active:scale-90"
                         title={isFav ? "Remove from Favorites" : "Add to Favorites"}
                         id={`fav-btn-grid-${item.id}`}
                       >
-                        <Heart className={`h-4.5 w-4.5 stroke-[2.5] ${isFav ? 'fill-[#E63946]' : 'text-gray-400'}`} />
+                        <Heart className={`h-3 w-3 sm:h-4.5 sm:w-4.5 stroke-[2.5] ${isFav ? 'fill-[#E63946]' : 'text-gray-400'}`} />
                       </button>
                     )}
 
                     {/* Custom Prep & Calories Badge in Image overlay bottom */}
-                    <div className="absolute bottom-3 right-3 flex gap-1.5">
+                    <div className="absolute bottom-1.5 right-1.5 sm:bottom-3 sm:right-3 flex gap-1">
                       {item.spicyLevel !== undefined && item.spicyLevel > 0 && (
-                        <span className="rounded-lg bg-red-600 border border-black px-2 py-0.5 text-[8px] font-black text-white shadow-sm font-mono leading-relaxed">
-                          {'🌶️'.repeat(item.spicyLevel)} SPICY
+                        <span className="rounded bg-red-600 border border-black px-1 sm:px-2 py-0.5 text-[7px] sm:text-[8px] font-black text-white shadow-sm font-mono leading-none">
+                          {'🌶️'.repeat(item.spicyLevel)}
                         </span>
                       )}
-                      <span className="flex items-center gap-1 rounded-lg bg-[#121212]/90 border border-black/55 px-2 py-0.5 text-[9px] font-bold text-white uppercase font-mono">
-                        <Clock className="h-3 w-3 text-[#F4A261]" />
+                      <span className="flex items-center gap-0.5 sm:gap-1 rounded bg-[#121212]/90 border border-black/55 px-1 sm:px-2 py-0.5 text-[7px] sm:text-[9px] font-bold text-white uppercase font-mono">
+                        <Clock className="h-2 w-2 sm:h-3 sm:w-3 text-[#F4A261]" />
                         {item.prepTime}
                       </span>
                     </div>
                   </div>
 
                   {/* Content body */}
-                  <div className="p-4 sm:p-5">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className={`font-sans text-base font-black tracking-tight transition-colors leading-snug uppercase ${
-                        isDarkMode ? 'text-white' : 'text-gray-900'
-                      } ${theme.textAccentHover}`}>
+                  <div className="p-2 sm:p-5">
+                    <div className="flex items-start justify-between gap-1 sm:gap-2">
+                      <h3 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectProduct(item);
+                        }}
+                        className={`font-sans text-xs sm:text-base font-black tracking-tight transition-colors leading-snug uppercase hover:underline cursor-pointer ${
+                          isDarkMode ? 'text-white' : 'text-gray-900'
+                        } ${theme.textAccentHover}`}
+                      >
                         {item.name}
                       </h3>
-                      <span className={`shrink-0 text-base font-black tracking-tight font-mono ${theme.textAccent}`}>
+                      <span className={`shrink-0 text-xs sm:text-base font-black tracking-tight font-mono ${theme.textAccent}`}>
                         {item.price.toFixed(0)} Br
                       </span>
                     </div>
 
                     {/* Rating star display on card */}
-                    <div className="flex items-center gap-1.5 mt-1">
+                    <div className="flex items-center gap-1 mt-0.5 sm:mt-1">
                       <div className="flex items-center text-amber-400">
-                        <Star className="h-3 w-3 fill-current" />
+                        <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-current" />
                       </div>
-                      <span className="text-[10px] font-black font-mono text-gray-500 uppercase tracking-wider">
-                        {avgRating ? `${avgRating} avg stars` : 'tap to rate'}
+                      <span className="text-[8px] sm:text-[10px] font-black font-mono text-gray-500 uppercase tracking-wider">
+                        {avgRating ? `${avgRating} avg` : 'rate'}
                       </span>
                     </div>
 
                     {/* Description */}
-                    <p className={`mt-2.5 line-clamp-2 text-xs font-semibold leading-relaxed font-sans ${textMutedClass}`}>
+                    <p className={`mt-1.5 sm:mt-2.5 line-clamp-1 sm:line-clamp-2 text-[10px] sm:text-xs font-semibold leading-relaxed font-sans ${textMutedClass}`}>
                       {item.description}
                     </p>
 
-                    <div className={`mt-4 flex items-center justify-between border-t border-dashed pt-3 text-[10px] font-black uppercase tracking-widest text-gray-400 ${theme.dividerClasses}`}>
+                    <div className={`mt-2.5 sm:mt-4 flex items-center justify-between border-t border-dashed pt-2 sm:pt-3 text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-gray-400 ${theme.dividerClasses}`}>
                       <span className="font-mono text-gray-400">{item.calories} Cal</span>
-                      <span className={`flex items-center gap-1 group-hover:translate-x-1 transition-transform ${theme.textAccent}`}>
-                        Inspect Recipe
-                        <ArrowRight className="h-3.5 w-3.5 stroke-[2.5]" />
+                      <span className={`flex items-center gap-0.5 sm:gap-1 group-hover:translate-x-1 transition-transform ${theme.textAccent}`}>
+                        <span className="hidden sm:inline">Inspect</span>
+                        <ArrowRight className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 stroke-[2.5]" />
                       </span>
                     </div>
                   </div>

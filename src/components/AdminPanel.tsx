@@ -86,6 +86,10 @@ export default function AdminPanel({
   const [newCatName, setNewCatName] = useState('');
   const [newCatId, setNewCatId] = useState('');
 
+  // Inline dynamic category state (when not in categories list)
+  const [isAddingInlineCat, setIsAddingInlineCat] = useState(false);
+  const [inlineCatName, setInlineCatName] = useState('');
+
   // Notification Toast state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -626,42 +630,47 @@ export default function AdminPanel({
               <AnimatePresence>
                 {isFormOpen && (
                   <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="overflow-hidden rounded-2xl border-2 border-black bg-white shadow-xl"
+                    initial={{ opacity: 0, scale: 0.98, y: -10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.98, y: -10 }}
+                    className="overflow-hidden rounded-2xl border-[4px] border-black bg-white shadow-[6px_6px_0px_0px_#E63946] transition-all"
                     id="admin-form-shell"
                   >
-                    <div className="border-b border-gray-150 bg-gray-50 px-5 py-4 flex items-center justify-between">
-                      <h4 className="flex items-center gap-2 text-sm font-black text-gray-900">
-                        <Sparkles className="h-4 w-4 text-[#F4A261]" />
+                    {/* Header: Classic Black and Red Theme */}
+                    <div className="border-b-[4px] border-black bg-[#E63946] px-5 py-4 flex items-center justify-between text-white">
+                      <h4 className="flex items-center gap-2 text-xs sm:text-sm font-black uppercase tracking-widest text-white">
+                        <Sparkles className="h-5 w-5 text-black animate-pulse" />
                         <span>{editingItem ? `Edit Recipe: ${editingItem.name}` : 'Compose Elegant New Item'}</span>
                       </h4>
                       <button
-                        onClick={() => setIsFormOpen(false)}
-                        className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                        onClick={() => {
+                          setIsFormOpen(false);
+                          setIsAddingInlineCat(false);
+                        }}
+                        className="rounded-lg border-2 border-black bg-black p-1 text-[#E63946] hover:bg-white hover:text-black transition-colors"
+                        title="Close Form"
                       >
-                        <X className="h-5 w-5" />
+                        <X className="h-4 w-4 stroke-[3]" />
                       </button>
                     </div>
 
-                    <form onSubmit={handleFormSubmit} className="p-5 space-y-4">
+                    <form onSubmit={handleFormSubmit} className="p-5 space-y-4 bg-white text-black">
                       {/* Grid fields */}
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div>
-                          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Item Title *</label>
+                          <label className="block text-xs font-black text-black uppercase tracking-wider mb-1">Item Title *</label>
                           <input
                             type="text"
                             required
                             placeholder="e.g. Garlic Jalapeno Smash"
                             value={itemName}
                             onChange={(e) => setItemName(e.target.value)}
-                            className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-bold text-gray-900 outline-none focus:border-[#E63946]"
+                            className="w-full rounded-xl border-2 border-black bg-white px-3.5 py-2.5 text-xs font-bold text-black outline-none focus:border-[#E63946] focus:ring-2 focus:ring-[#E63946]"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Price (Birr) *</label>
+                          <label className="block text-xs font-black text-black uppercase tracking-wider mb-1">Price (Birr) *</label>
                           <input
                             type="number"
                             step="1"
@@ -669,68 +678,126 @@ export default function AdminPanel({
                             placeholder="e.g. 750"
                             value={itemPrice}
                             onChange={(e) => setItemPrice(e.target.value)}
-                            className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-bold text-gray-900 outline-none focus:border-[#E63946]"
+                            className="w-full rounded-xl border-2 border-black bg-white px-3.5 py-2.5 text-xs font-bold text-black outline-none focus:border-[#E63946] focus:ring-2 focus:ring-[#E63946]"
                           />
                         </div>
                       </div>
 
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div>
-                          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Category Group *</label>
-                          <select
-                            value={itemCategory}
-                            onChange={(e) => setItemCategory(e.target.value)}
-                            className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-bold text-gray-900 outline-none"
-                          >
-                            {categories.map(c => (
-                              <option key={c.id} value={c.id}>{c.name}</option>
-                            ))}
-                          </select>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="block text-xs font-black text-black uppercase tracking-wider">Category Group *</label>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsAddingInlineCat(!isAddingInlineCat);
+                                setInlineCatName('');
+                              }}
+                              className="text-[10px] font-black text-[#E63946] hover:bg-red-50 hover:px-1 rounded uppercase tracking-wider transition-all"
+                              id="toggle-inline-category-btn"
+                            >
+                              {isAddingInlineCat ? "✕ Existing List" : "✏️ + Add if not listed"}
+                            </button>
+                          </div>
+
+                          {isAddingInlineCat ? (
+                            <div className="flex gap-2 items-center">
+                              <input
+                                type="text"
+                                placeholder="Write new category name..."
+                                value={inlineCatName}
+                                onChange={(e) => setInlineCatName(e.target.value)}
+                                className="flex-1 rounded-xl border-2 border-black bg-white px-3.5 py-2.5 text-xs font-bold text-black outline-none focus:border-[#E63946] focus:ring-2 focus:ring-[#E63946]"
+                                id="inline-category-name-input"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const nameTrimmed = inlineCatName.trim();
+                                  if (!nameTrimmed) {
+                                    triggerToast('Provide a valid category name!');
+                                    return;
+                                  }
+                                  const safeId = nameTrimmed.toLowerCase().replace(/\s+/g, '-');
+                                  if (categories.some(c => c.id === safeId)) {
+                                    triggerToast('Category already exists! Selected from list.');
+                                    setItemCategory(safeId);
+                                    setIsAddingInlineCat(false);
+                                    setInlineCatName('');
+                                    return;
+                                  }
+                                  const newCatObj: Category = {
+                                    id: safeId,
+                                    name: nameTrimmed,
+                                    iconName: 'Flame'
+                                  };
+                                  onAddCategory(newCatObj);
+                                  setItemCategory(safeId);
+                                  setIsAddingInlineCat(false);
+                                  setInlineCatName('');
+                                  triggerToast(`Added category "${nameTrimmed}"`);
+                                }}
+                                className="rounded-xl border-2 border-black bg-black text-white hover:bg-[#E63946] hover:text-white px-4 py-2.5 text-xs font-black uppercase transition-all shadow-[2px_2px_0px_0px_#E63946]"
+                              >
+                                Save
+                              </button>
+                            </div>
+                          ) : (
+                            <select
+                              value={itemCategory}
+                              onChange={(e) => setItemCategory(e.target.value)}
+                              className="w-full rounded-xl border-2 border-black bg-white px-3.5 py-2.5 text-xs font-bold text-black outline-none focus:border-[#E63946] focus:ring-2 focus:ring-[#E63946] appearance-none"
+                            >
+                              {categories.map(c => (
+                                <option key={c.id} value={c.id}>{c.name}</option>
+                              ))}
+                            </select>
+                          )}
                         </div>
 
                         <div>
-                          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Prep Speed *</label>
+                          <label className="block text-xs font-black text-black uppercase tracking-wider mb-1">Prep Speed *</label>
                           <input
                             type="text"
                             required
                             placeholder="e.g. 5-7 min"
                             value={itemPrepTime}
                             onChange={(e) => setItemPrepTime(e.target.value)}
-                            className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-bold text-gray-900 outline-none focus:border-[#E63946]"
+                            className="w-full rounded-xl border-2 border-black bg-white px-3.5 py-2.5 text-xs font-bold text-black outline-none focus:border-[#E63946] focus:ring-2 focus:ring-[#E63946]"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Image URL *</label>
+                        <label className="block text-xs font-black text-black uppercase tracking-wider mb-1">Image URL *</label>
                         <input
                           type="url"
                           required
                           placeholder="e.g. https://images.unsplash.com/..."
                           value={itemImage}
                           onChange={(e) => setItemImage(e.target.value)}
-                          className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-bold text-gray-900 outline-none focus:border-[#E63946]"
+                          className="w-full rounded-xl border-2 border-black bg-white px-3.5 py-2.5 text-xs font-bold text-black outline-none focus:border-[#E63946] focus:ring-2 focus:ring-[#E63946]"
                         />
                       </div>
 
                       <div className="grid gap-4 sm:grid-cols-3">
                         <div>
-                          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Energy (Calories)</label>
+                          <label className="block text-xs font-black text-black uppercase tracking-wider mb-1">Energy (Calories)</label>
                           <input
                             type="number"
                             placeholder="650"
                             value={itemCalories}
                             onChange={(e) => setItemCalories(e.target.value)}
-                            className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-bold text-gray-900 outline-none"
+                            className="w-full rounded-xl border-2 border-black bg-white px-3.5 py-2.5 text-xs font-bold text-black outline-none focus:border-[#E63946] focus:ring-2 focus:ring-[#E63946]"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Spicy Tier (0 - 3)</label>
+                          <label className="block text-xs font-black text-black uppercase tracking-wider mb-1">Spicy Tier (0 - 3)</label>
                           <select
                             value={itemSpicy}
                             onChange={(e) => setItemSpicy(e.target.value)}
-                            className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-bold text-gray-900"
+                            className="w-full rounded-xl border-2 border-black bg-white px-3.5 py-2.5 text-xs font-bold text-black focus:border-[#E63946] focus:ring-2 focus:ring-[#E63946]"
                           >
                             <option value="0">0 (Mild)</option>
                             <option value="1">1 (Warm)</option>
@@ -739,23 +806,23 @@ export default function AdminPanel({
                           </select>
                         </div>
 
-                        <div className="flex gap-4 items-center justify-around h-full pt-4">
-                          <label className="flex items-center gap-1.5 cursor-pointer text-xs font-bold text-gray-700">
+                        <div className="flex gap-4 items-center justify-around h-full pt-4 border-2 border-black rounded-xl px-2 bg-gray-50">
+                          <label className="flex items-center gap-1.5 cursor-pointer text-xs font-black uppercase text-black select-none">
                             <input
                               type="checkbox"
                               checked={itemIsPopular}
                               onChange={(e) => setItemIsPopular(e.target.checked)}
-                              className="rounded border-gray-300 text-[#E63946] focus:ring-[#E63946] h-4 w-4"
+                              className="rounded border-2 border-black text-[#E63946] focus:ring-[#E63946] h-4.5 w-4.5 cursor-pointer"
                             />
                             <span>Popular</span>
                           </label>
 
-                          <label className="flex items-center gap-1.5 cursor-pointer text-xs font-bold text-gray-700">
+                          <label className="flex items-center gap-1.5 cursor-pointer text-xs font-black uppercase text-black select-none">
                             <input
                               type="checkbox"
                               checked={itemIsVeg}
                               onChange={(e) => setItemIsVeg(e.target.checked)}
-                              className="rounded border-gray-300 text-[#E63946] focus:ring-[#E63946] h-4 w-4"
+                              className="rounded border-2 border-black text-[#E63946] focus:ring-[#E63946] h-4.5 w-4.5 cursor-pointer"
                             />
                             <span>Veg</span>
                           </label>
@@ -763,39 +830,42 @@ export default function AdminPanel({
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Description *</label>
+                        <label className="block text-xs font-black text-black uppercase tracking-wider mb-1">Description *</label>
                         <textarea
                           rows={2}
                           required
                           placeholder="Summative gourmet details..."
                           value={itemDescription}
                           onChange={(e) => setItemDescription(e.target.value)}
-                          className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-bold text-gray-900 outline-none"
+                          className="w-full rounded-xl border-2 border-black bg-white px-3.5 py-2.5 text-xs font-bold text-black outline-none focus:border-[#E63946] focus:ring-2 focus:ring-[#E63946]"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Ingredients (comma-separated)</label>
+                        <label className="block text-xs font-black text-black uppercase tracking-wider mb-1">Ingredients (comma-separated)</label>
                         <input
                           type="text"
                           placeholder="e.g. Wagyu beef, Cheddar, Bole Chili Spice"
                           value={itemIngredients}
                           onChange={(e) => setItemIngredients(e.target.value)}
-                          className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-bold text-gray-900 outline-none"
+                          className="w-full rounded-xl border-2 border-black bg-white px-3.5 py-2.5 text-xs font-bold text-black outline-none focus:border-[#E63946] focus:ring-2 focus:ring-[#E63946]"
                         />
                       </div>
 
                       <div className="flex justify-end gap-3 pt-2">
                         <button
                           type="button"
-                          onClick={() => setIsFormOpen(false)}
-                          className="rounded-xl border border-gray-300 bg-white text-gray-700 px-4 py-2 text-xs font-bold uppercase transition-all"
+                          onClick={() => {
+                            setIsFormOpen(false);
+                            setIsAddingInlineCat(false);
+                          }}
+                          className="rounded-xl border-2 border-black bg-black text-white px-4 py-2.5 text-xs font-black uppercase transition-all hover:bg-gray-800"
                         >
                           Cancel
                         </button>
                         <button
                           type="submit"
-                          className="rounded-xl border-2 border-black bg-[#E63946] text-white px-5 py-2 text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:scale-95 transition-all"
+                          className="rounded-xl border-2 border-black bg-[#E63946] text-white px-5 py-2.5 text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:scale-95 transition-all hover:bg-black hover:text-white"
                         >
                           Save Changes
                         </button>
@@ -909,24 +979,28 @@ export default function AdminPanel({
               <AnimatePresence>
                 {isCategoryFormOpen && (
                   <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="overflow-hidden rounded-2xl border-2 border-black bg-white shadow-xl max-w-lg"
+                    initial={{ opacity: 0, scale: 0.98, y: -10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.98, y: -10 }}
+                    className="overflow-hidden rounded-2xl border-[4px] border-black bg-white shadow-[6px_6px_0px_0px_#E63946] max-w-lg transition-all"
                   >
-                    <div className="border-b border-gray-100 bg-gray-50 px-5 py-4 flex items-center justify-between">
-                      <h4 className="font-black text-xs uppercase text-gray-900 flex items-center gap-1.5">
-                        <Sparkles className="h-4.5 w-4.5 text-amber-500" />
+                    <div className="border-b-[4px] border-black bg-[#E63946] px-5 py-4 flex items-center justify-between text-white">
+                      <h4 className="font-black text-xs sm:text-sm uppercase tracking-widest text-white flex items-center gap-1.5 font-display">
+                        <Sparkles className="h-5 w-5 text-black animate-bounce" />
                         <span>Form New Grouping</span>
                       </h4>
-                      <button onClick={() => setIsCategoryFormOpen(false)} className="text-gray-400 hover:text-gray-600">
-                        <X className="h-5 w-5" />
+                      <button 
+                        onClick={() => setIsCategoryFormOpen(false)} 
+                        className="rounded-lg border-2 border-black bg-black p-1 text-[#E63946] hover:bg-white hover:text-black transition-colors"
+                        title="Close Category Form"
+                      >
+                        <X className="h-4 w-4 stroke-[3]" />
                       </button>
                     </div>
 
-                    <form onSubmit={handleCategorySubmit} className="p-5 space-y-4">
+                    <form onSubmit={handleCategorySubmit} className="p-5 space-y-4 bg-white text-black">
                       <div>
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Grouping Name *</label>
+                        <label className="block text-xs font-black text-black uppercase tracking-wider mb-1">Grouping Name *</label>
                         <input
                           type="text"
                           required
@@ -936,18 +1010,18 @@ export default function AdminPanel({
                             setNewCatName(e.target.value);
                             setNewCatId(e.target.value.trim().toLowerCase().replace(/\s+/g, '-'));
                           }}
-                          className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs font-bold text-gray-950"
+                          className="w-full rounded-xl border-2 border-black bg-white px-3.5 py-2.5 text-xs font-bold text-black outline-none focus:border-[#E63946] focus:ring-2 focus:ring-[#E63946]"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1 font-mono">Custom ID identifier</label>
+                        <label className="block text-xs font-black text-black uppercase tracking-wider mb-1 font-mono">Custom ID identifier</label>
                         <input
                           type="text"
                           placeholder="e.g. milkshakes (autogenerated)"
                           value={newCatId}
                           onChange={(e) => setNewCatId(e.target.value)}
-                          className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-xs font-mono font-bold text-gray-550"
+                          className="w-full rounded-xl border-2 border-black bg-gray-50 px-3.5 py-2.5 text-xs font-mono font-bold text-gray-700 outline-none focus:border-[#E63946] focus:ring-2 focus:ring-[#E63946]"
                         />
                       </div>
 
@@ -955,13 +1029,13 @@ export default function AdminPanel({
                         <button
                           type="button"
                           onClick={() => setIsCategoryFormOpen(false)}
-                          className="rounded-xl border border-gray-200 text-gray-600 px-4 py-2 text-xs font-black uppercase"
+                          className="rounded-xl border-2 border-black bg-black text-white px-4 py-2.5 text-xs font-black uppercase transition-all hover:bg-gray-800"
                         >
                           Cancel
                         </button>
                         <button
                           type="submit"
-                          className="rounded-xl border-2 border-black bg-[#E63946] text-white px-5 py-2 text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"
+                          className="rounded-xl border-2 border-black bg-[#E63946] text-white px-5 py-2.5 text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:scale-95 transition-all hover:bg-black hover:text-white"
                         >
                           Save Category
                         </button>
