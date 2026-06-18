@@ -16,6 +16,7 @@ import ItemDetail from './components/ItemDetail';
 import AdminPanel from './components/AdminPanel';
 import ContactView from './components/ContactView';
 import FavoritesView from './components/FavoritesView';
+import Onboarding from './components/Onboarding';
 import { 
   MapPin, 
   Phone, 
@@ -71,15 +72,24 @@ export default function App() {
     const saved = localStorage.getItem('wow_burger_menu_items');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        return parsed.map((item: any) => ({
+          ...item,
+          isAvailable: item.isAvailable !== undefined ? item.isAvailable : true
+        }));
       } catch (e) {
-        return INITIAL_MENU_ITEMS.map(item => ({ ...item, ratings: item.ratings || [5, 4, 5] }));
+        return INITIAL_MENU_ITEMS.map(item => ({ 
+          ...item, 
+          ratings: item.ratings || [5, 4, 5],
+          isAvailable: item.isAvailable !== undefined ? item.isAvailable : true
+        }));
       }
     }
     // Initialize original recipes with default rating arrays
     return INITIAL_MENU_ITEMS.map(item => ({
       ...item,
-      ratings: item.ratings || [5, 4, 5]
+      ratings: item.ratings || [5, 4, 5],
+      isAvailable: item.isAvailable !== undefined ? item.isAvailable : true
     }));
   });
 
@@ -232,6 +242,11 @@ export default function App() {
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.35, ease: 'easeInOut' }}
             >
+              <div className="mx-auto max-w-7xl px-4 pt-6 md:px-6">
+                {/* Premium Slidable Onboarding Showcase */}
+                <Onboarding isDarkMode={isDarkMode} />
+              </div>
+
               <MenuGrid 
                 items={menuItems} 
                 categories={categories} 

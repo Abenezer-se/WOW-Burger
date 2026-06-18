@@ -80,6 +80,7 @@ export default function AdminPanel({
   const [itemSpicy, setItemSpicy] = useState('0');
   const [itemIsPopular, setItemIsPopular] = useState(false);
   const [itemIsVeg, setItemIsVeg] = useState(false);
+  const [itemIsAvailable, setItemIsAvailable] = useState(true);
 
   // Category Simple Form states
   const [isCategoryFormOpen, setIsCategoryFormOpen] = useState(false);
@@ -136,6 +137,7 @@ export default function AdminPanel({
     setItemSpicy((item.spicyLevel ?? 0).toString());
     setItemIsPopular(!!item.isPopular);
     setItemIsVeg(!!item.isVegetarian);
+    setItemIsAvailable(item.isAvailable !== false);
     setIsFormOpen(true);
   };
 
@@ -152,6 +154,7 @@ export default function AdminPanel({
     setItemSpicy('0');
     setItemIsPopular(false);
     setItemIsVeg(false);
+    setItemIsAvailable(true);
     setItemImage('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=600');
     setIsFormOpen(true);
   };
@@ -183,6 +186,7 @@ export default function AdminPanel({
       spicyLevel: parseInt(itemSpicy) || 0,
       isPopular: itemIsPopular,
       isVegetarian: itemIsVeg,
+      isAvailable: itemIsAvailable,
       ratings: editingItem ? (editingItem.ratings || []) : [5] // Initialize with a 5 star for freshly created
     };
 
@@ -242,13 +246,17 @@ export default function AdminPanel({
       });
     });
     const avgRatingAll = totalRatingsCount > 0 ? (sumRating / totalRatingsCount).toFixed(1) : '5.0';
+    const availableCount = items.filter(i => i.isAvailable !== false).length;
+    const outOfStockCount = totalCount - availableCount;
 
     return {
       totalCount,
       catCount,
       popularCount,
       avgPrice: avgPrice.toFixed(0),
-      avgRatingAll
+      avgRatingAll,
+      availableCount,
+      outOfStockCount
     };
   }, [items, categories]);
 
@@ -478,49 +486,77 @@ export default function AdminPanel({
               </div>
 
               {/* Bento Grid Stats - Adjusted for Absolute Visibility in Dark & Light Modes */}
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <div className={`rounded-xl border-[3px] border-[#E63946] p-5 shadow-[4px_4px_0px_0px_#E63946] hover:-translate-y-px transition-all ${cardBg}`}>
+              <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+                {/* 1. Total Items */}
+                <div className={`rounded-xl border-[3px] border-black p-4 shadow-[3px_3px_0px_0px_#E63946] hover:-translate-y-px transition-all ${cardBg}`}>
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-gray-500 font-mono">Dishes Listed</span>
-                    <span className="rounded-lg bg-red-95/10 border border-[#E63946] p-2 text-[#E63946]">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-gray-500 font-mono">Total Items</span>
+                    <span className="rounded-lg bg-[#E63946]/10 border border-black p-1.5 text-[#E63946]">
                       <Utensils className="h-4 w-4 stroke-[2.5]" />
                     </span>
                   </div>
-                  <h4 className={`mt-3 text-3xl font-black font-mono leading-none ${labelClass}`}>{stats.totalCount}</h4>
-                  <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Recipes catalogue</p>
+                  <h4 className={`mt-2 text-2xl font-black font-mono leading-none ${labelClass}`}>{stats.totalCount}</h4>
+                  <p className="mt-1.5 text-[9px] font-semibold uppercase tracking-wider text-gray-500">Recipes catalogue</p>
                 </div>
 
-                <div className={`rounded-xl border-[3px] border-[#E63946] p-5 shadow-[4px_4px_0px_0px_#E63946] hover:-translate-y-px transition-all ${cardBg}`}>
+                {/* 2. Available Items */}
+                <div className={`rounded-xl border-[3px] border-black p-4 shadow-[3px_3px_0px_0px_#10B981] hover:-translate-y-px transition-all ${cardBg}`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-gray-500 font-mono">Available</span>
+                    <span className="rounded-lg bg-emerald-500/10 border border-black p-1.5 text-emerald-500">
+                      <Check className="h-4 w-4 stroke-[2.5]" />
+                    </span>
+                  </div>
+                  <h4 className={`mt-2 text-2xl font-black font-mono leading-none ${labelClass}`}>{stats.availableCount}</h4>
+                  <p className="mt-1.5 text-[9px] font-semibold uppercase tracking-wider text-gray-500">In stock now</p>
+                </div>
+
+                {/* 3. Out of stock Items */}
+                <div className={`rounded-xl border-[3px] border-black p-4 shadow-[3px_3px_0px_0px_#F59E0B] hover:-translate-y-px transition-all ${cardBg}`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-gray-500 font-mono">Out of Stock</span>
+                    <span className="rounded-lg bg-amber-500/10 border border-black p-1.5 text-amber-500">
+                      <X className="h-4 w-4 stroke-[2.5]" />
+                    </span>
+                  </div>
+                  <h4 className={`mt-2 text-2xl font-black font-mono leading-none ${labelClass}`}>{stats.outOfStockCount}</h4>
+                  <p className="mt-1.5 text-[9px] font-semibold uppercase tracking-wider text-gray-500">Unavailable dishes</p>
+                </div>
+
+                {/* 4. Categories */}
+                <div className={`rounded-xl border-[3px] border-black p-4 shadow-[3px_3px_0px_0px_#06B6D4] hover:-translate-y-px transition-all ${cardBg}`}>
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-black uppercase tracking-wider text-gray-500 font-mono">Categories</span>
-                    <span className="rounded-lg bg-amber-95/15 border border-[#E63946] p-2 text-[#F4A261]">
+                    <span className="rounded-lg bg-cyan-500/10 border border-black p-1.5 text-cyan-500">
                       <Tags className="h-4 w-4 stroke-[2.5]" />
                     </span>
                   </div>
-                  <h4 className={`mt-3 text-3xl font-black font-mono leading-none ${labelClass}`}>{stats.catCount}</h4>
-                  <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Active groupings</p>
+                  <h4 className={`mt-2 text-2xl font-black font-mono leading-none ${labelClass}`}>{stats.catCount}</h4>
+                  <p className="mt-1.5 text-[9px] font-semibold uppercase tracking-wider text-gray-500">Active groupings</p>
                 </div>
 
-                <div className={`rounded-xl border-[3px] border-[#E63946] p-5 shadow-[4px_4px_0px_0px_#E63946] hover:-translate-y-px transition-all ${cardBg}`}>
+                {/* 5. Average Rating */}
+                <div className={`rounded-xl border-[3px] border-black p-4 shadow-[3px_3px_0px_0px_#F59E0B] hover:-translate-y-px transition-all ${cardBg}`}>
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-black uppercase tracking-wider text-gray-500 font-mono">Average Rating</span>
-                    <span className="rounded-lg bg-orange-95/10 border border-[#E63946] p-2 text-amber-500">
+                    <span className="rounded-lg bg-orange-500/10 border border-black p-1.5 text-[#F4A261]">
                       <Star className="h-4 w-4 fill-current stroke-[2.5]" />
                     </span>
                   </div>
-                  <h4 className={`mt-3 text-3xl font-black font-mono leading-none ${labelClass}`}>★ {stats.avgRatingAll}</h4>
-                  <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">User star aggregate</p>
+                  <h4 className={`mt-2 text-2xl font-black font-mono leading-none ${labelClass}`}>★ {stats.avgRatingAll}</h4>
+                  <p className="mt-1.5 text-[9px] font-semibold uppercase tracking-wider text-gray-500">User star aggregate</p>
                 </div>
 
-                <div className={`rounded-xl border-[3px] border-[#E63946] p-5 shadow-[4px_4px_0px_0px_#E63946] hover:-translate-y-px transition-all ${cardBg}`}>
+                {/* 6. Average Price */}
+                <div className={`rounded-xl border-[3px] border-black p-4 shadow-[3px_3px_0px_0px_#8B5CF6] hover:-translate-y-px transition-all ${cardBg}`}>
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-black uppercase tracking-wider text-gray-500 font-mono">Average Price</span>
-                    <span className="rounded-lg bg-green-95/10 border border-[#E63946] p-2 text-emerald-500">
+                    <span className="rounded-lg bg-purple-500/10 border border-black p-1.5 text-purple-500">
                       <DollarSign className="h-4 w-4 stroke-[2.5]" />
                     </span>
                   </div>
-                  <h4 className={`mt-3 text-3xl font-black font-mono leading-none ${labelClass}`}>{stats.avgPrice} Br</h4>
-                  <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">Average billing weight</p>
+                  <h4 className={`mt-2 text-2xl font-black font-mono leading-none ${labelClass}`}>{stats.avgPrice} Br</h4>
+                  <p className="mt-1.5 text-[9px] font-semibold uppercase tracking-wider text-gray-500">Billing weight</p>
                 </div>
               </div>
 
@@ -830,6 +866,18 @@ export default function AdminPanel({
                       </div>
 
                       <div>
+                        <label className="block text-xs font-black text-black uppercase tracking-wider mb-1">Availability Status *</label>
+                        <select
+                          value={itemIsAvailable ? "true" : "false"}
+                          onChange={(e) => setItemIsAvailable(e.target.value === "true")}
+                          className="w-full rounded-xl border-2 border-black bg-white px-3.5 py-2.5 text-xs font-black text-black outline-none focus:border-[#E63946] focus:ring-2 focus:ring-[#E63946] appearance-none"
+                        >
+                          <option value="true">Available</option>
+                          <option value="false">Out of Stock</option>
+                        </select>
+                      </div>
+
+                      <div>
                         <label className="block text-xs font-black text-black uppercase tracking-wider mb-1">Description *</label>
                         <textarea
                           rows={2}
@@ -915,9 +963,38 @@ export default function AdminPanel({
                           )}
                         </td>
                         <td className="px-4 py-3">
-                          <div className="flex gap-1.5 flex-wrap">
-                            {item.isPopular && <span className="bg-red-500/10 border border-red-500/15 text-red-500 px-1 py-0.5 rounded text-[8px] font-black uppercase">Popular</span>}
-                            {item.isVegetarian && <span className="bg-emerald-500/10 border border-emerald-500/15 text-emerald-500 px-1 py-0.5 rounded text-[8px] font-black uppercase">Veg</span>}
+                          <div className="flex flex-col gap-1.5">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {/* Status Badge */}
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black uppercase border select-none ${
+                                item.isAvailable !== false
+                                  ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-500'
+                                  : 'bg-red-500/15 border-red-500/30 text-red-500'
+                              }`}>
+                                <span className={`h-1.5 w-1.5 rounded-full ${item.isAvailable !== false ? 'bg-emerald-500' : 'bg-red-500 animate-pulse'}`} />
+                                {item.isAvailable !== false ? 'Available' : 'Out of Stock'}
+                              </span>
+
+                              {/* Toggle Switch Button */}
+                              <button
+                                onClick={() => {
+                                  const updated = { ...item, isAvailable: item.isAvailable === false ? true : false };
+                                  onUpdateItem(updated);
+                                  triggerToast(`"${item.name}" is now ${item.isAvailable === false ? 'Available' : 'Out of Stock'}`);
+                                }}
+                                className={`text-[9px] font-black uppercase px-2 py-0.5 rounded border-2 border-black hover:bg-[#E63946] hover:text-white transition-all shadow-[1.5px_1.5px_0px_0px_rgba(0,0,0,1)] active:translate-y-px active:shadow-none shrink-0 ${
+                                  isDarkMode ? 'bg-gray-800 text-white' : 'bg-gray-100 text-black'
+                                }`}
+                                title="Toggle availability without editing product form"
+                              >
+                                Toggle
+                              </button>
+                            </div>
+                            
+                            <div className="flex gap-1.5 flex-wrap">
+                              {item.isPopular && <span className="bg-red-500/10 border border-red-500/15 text-red-500 px-1 py-0.5 rounded text-[8px] font-black uppercase">Popular</span>}
+                              {item.isVegetarian && <span className="bg-emerald-500/10 border border-emerald-500/15 text-emerald-500 px-1 py-0.5 rounded text-[8px] font-black uppercase">Veg</span>}
+                            </div>
                           </div>
                         </td>
                         <td className="px-4 py-3 text-right">

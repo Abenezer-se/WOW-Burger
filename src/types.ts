@@ -17,6 +17,7 @@ export interface MenuItem {
   isPopular?: boolean;
   isVegetarian?: boolean;
   ratings?: number[]; // rating array e.g. [5, 4, 5, 3]
+  isAvailable?: boolean;
 }
 
 export interface Category {

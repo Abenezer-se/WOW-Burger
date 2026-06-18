@@ -135,8 +135,16 @@ export default function FavoritesView({
             return (
               <div
                 key={item.id}
-                className={`group relative cursor-pointer overflow-hidden rounded-2xl border-[3px] bg-[#1A1A1A] transition-all duration-300 hover:-translate-y-1 ${cardBgClass} ${styles.cardClasses}`}
-                onClick={() => onSelectProduct(item)}
+                className={`group relative overflow-hidden rounded-2xl border-[3px] bg-[#1A1A1A] transition-all duration-300 ${
+                  item.isAvailable === false
+                    ? 'opacity-60 saturate-50 cursor-not-allowed'
+                    : 'cursor-pointer hover:-translate-y-1'
+                } ${cardBgClass} ${styles.cardClasses}`}
+                onClick={() => {
+                  if (item.isAvailable !== false) {
+                    onSelectProduct(item);
+                  }
+                }}
               >
                 {/* Image panel */}
                 <div className={`relative aspect-video w-full overflow-hidden bg-gray-950 ${styles.imageBorder}`}>
@@ -147,6 +155,15 @@ export default function FavoritesView({
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   
+                  {/* Out of Stock Banner Overlay */}
+                  {item.isAvailable === false && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
+                      <span className="bg-[#E63946] text-white font-black text-[9px] sm:text-[11px] uppercase tracking-widest px-3 py-1.5 border-2 border-black rounded-lg shadow-[2.5px_2.5px_0px_0px_black] rotate-[-5deg] animate-pulse">
+                        Out of Stock
+                      </span>
+                    </div>
+                  )}
+
                   {/* Category Pill Tag */}
                   <span className="absolute top-3 left-3 rounded bg-black/75 px-2 py-0.5 font-mono text-[9px] font-black uppercase tracking-wider text-white">
                     {item.category}
@@ -158,7 +175,7 @@ export default function FavoritesView({
                       e.stopPropagation();
                       onToggleFavorite(item.id);
                     }}
-                    className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-lg border-2 border-black bg-white text-[#E63946] shadow-sm transition-transform active:scale-90"
+                    className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-lg border-2 border-black bg-white text-[#E63946] shadow-sm transition-transform active:scale-90 z-20"
                     title="Remove from favorites"
                   >
                     <Heart className="h-4 w-4 fill-[#E63946] stroke-[2.5]" />
@@ -170,7 +187,7 @@ export default function FavoritesView({
                   <div className="flex items-start justify-between gap-1">
                     <h3 className={`font-sans text-sm font-black tracking-tight leading-snug uppercase transition-colors line-clamp-1 ${
                       isDarkMode ? 'text-white' : 'text-gray-900'
-                    } ${styles.textAccentHover}`}>
+                    } ${item.isAvailable === false ? '' : styles.textAccentHover}`}>
                       {item.name}
                     </h3>
                     <span className={`shrink-0 text-sm font-black tracking-tight font-mono ${styles.textAccent}`}>
@@ -183,8 +200,10 @@ export default function FavoritesView({
                   </p>
 
                   <div className={`mt-4 flex items-center justify-between border-t border-dashed pt-3 text-[10px] font-black uppercase tracking-widest ${styles.dividerClasses}`}>
-                    <span className={`flex items-center gap-1 group-hover:translate-x-1 transition-transform ${styles.textAccent}`}>
-                      View Details &gt;
+                    <span className={`flex items-center gap-1 ${
+                      item.isAvailable === false ? 'opacity-40' : 'group-hover:translate-x-1 transition-transform ' + styles.textAccent
+                    }`}>
+                      {item.isAvailable === false ? 'Unavailable' : 'View Details >'}
                     </span>
                     <span className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
