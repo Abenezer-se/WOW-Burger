@@ -29,7 +29,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '8-10 min',
     spicyLevel: 0,
     isPopular: true,
-    isVegetarian: false
+    isVegetarian: false,
+    isAvailable: true
   },
   {
     id: 'b2',
@@ -43,7 +44,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '6-8 min',
     spicyLevel: 3,
     isPopular: false,
-    isVegetarian: false
+    isVegetarian: false,
+    isAvailable: true
   },
   {
     id: 'b3',
@@ -57,7 +59,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '8-11 min',
     spicyLevel: 1,
     isPopular: true,
-    isVegetarian: false
+    isVegetarian: false,
+    isAvailable: true
   },
   {
     id: 'b4',
@@ -71,7 +74,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '7-9 min',
     spicyLevel: 0,
     isPopular: false,
-    isVegetarian: true
+    isVegetarian: true,
+    isAvailable: true
   },
   {
     id: 'b5',
@@ -85,7 +89,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '9-12 min',
     spicyLevel: 0,
     isPopular: true,
-    isVegetarian: false
+    isVegetarian: false,
+    isAvailable: true
   },
 
   // --- PIZZAS ---
@@ -101,7 +106,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '10-12 min',
     spicyLevel: 0,
     isPopular: true,
-    isVegetarian: true
+    isVegetarian: true,
+    isAvailable: true
   },
   {
     id: 'p2',
@@ -115,7 +121,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '8-10 min',
     spicyLevel: 2,
     isPopular: false,
-    isVegetarian: false
+    isVegetarian: false,
+    isAvailable: true
   },
   {
     id: 'p3',
@@ -129,14 +136,15 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '9-11 min',
     spicyLevel: 0,
     isPopular: true,
-    isVegetarian: false
+    isVegetarian: false,
+    isAvailable: true
   },
 
   // --- SANDWICHES ---
   {
     id: 'sw1',
     name: 'Ultimate Pastrami Rye Melt',
-    description: 'Twelve-hour smoked beef pastrami piled high on toasted dark rye sourdough, with warm Swiss Emmental cheese, homemade sauerkraut, and hot mustard Russian dressing.',
+    description: 'Twelve-hour smoked beef pastrami piled high on toasted dark rye sourdough, with warm Swiss Emmental cheese, homemade sourdough sauerkraut, and hot mustard Russian dressing.',
     price: 680.00,
     image: 'https://images.unsplash.com/photo-1521390188846-e2a3a97453a0?auto=format&fit=crop&q=80&w=600',
     category: 'sandwiches',
@@ -145,7 +153,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '6-8 min',
     spicyLevel: 1,
     isPopular: true,
-    isVegetarian: false
+    isVegetarian: false,
+    isAvailable: true
   },
   {
     id: 'sw2',
@@ -159,7 +168,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '4-6 min',
     spicyLevel: 0,
     isPopular: false,
-    isVegetarian: true
+    isVegetarian: true,
+    isAvailable: true
   },
   {
     id: 'sw3',
@@ -173,7 +183,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '7-9 min',
     spicyLevel: 2,
     isPopular: true,
-    isVegetarian: false
+    isVegetarian: false,
+    isAvailable: true
   },
 
   // --- DESSERTS & CAKES ---
@@ -189,7 +200,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '5-7 min',
     spicyLevel: 0,
     isPopular: true,
-    isVegetarian: true
+    isVegetarian: true,
+    isAvailable: true
   },
   {
     id: 'd2',
@@ -203,7 +215,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '3-4 min',
     spicyLevel: 0,
     isPopular: true,
-    isVegetarian: true
+    isVegetarian: true,
+    isAvailable: true
   },
   {
     id: 'd3',
@@ -217,7 +230,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '2-3 min',
     spicyLevel: 0,
     isPopular: false,
-    isVegetarian: true
+    isVegetarian: true,
+    isAvailable: true
   },
   {
     id: 'd4',
@@ -230,7 +244,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     calories: 460,
     prepTime: '3-5 min',
     isPopular: false,
-    isVegetarian: true
+    isVegetarian: true,
+    isAvailable: true
   },
   {
     id: 'd5',
@@ -244,7 +259,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '2-3 min',
     spicyLevel: 0,
     isPopular: false,
-    isVegetarian: true
+    isVegetarian: true,
+    isAvailable: true
   },
 
   // --- HOT BREWS ---
@@ -260,7 +276,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '3-4 min',
     spicyLevel: 0,
     isPopular: true,
-    isVegetarian: true
+    isVegetarian: true,
+    isAvailable: true
   },
   {
     id: 'h2',
@@ -274,7 +291,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '2-4 min',
     spicyLevel: 0,
     isPopular: false,
-    isVegetarian: true
+    isVegetarian: true,
+    isAvailable: true
   },
   {
     id: 'h3',
@@ -288,7 +306,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '3-4 min',
     spicyLevel: 0,
     isPopular: true,
-    isVegetarian: true
+    isVegetarian: true,
+    isAvailable: true
   },
 
   // --- CHILLED DRINKS ---
@@ -304,7 +323,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '3-4 min',
     spicyLevel: 0,
     isPopular: true,
-    isVegetarian: true
+    isVegetarian: true,
+    isAvailable: true
   },
   {
     id: 'c2',
@@ -318,7 +338,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '2-3 min',
     spicyLevel: 0,
     isPopular: false,
-    isVegetarian: true
+    isVegetarian: true,
+    isAvailable: true
   },
   {
     id: 'c3',
@@ -332,7 +353,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '2-3 min',
     spicyLevel: 0,
     isPopular: true,
-    isVegetarian: true
+    isVegetarian: true,
+    isAvailable: true
   },
   {
     id: 'c4',
@@ -346,7 +368,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '2-3 min',
     spicyLevel: 0,
     isPopular: false,
-    isVegetarian: true
+    isVegetarian: true,
+    isAvailable: true
   },
 
   // --- SIDES ---
@@ -361,7 +384,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     calories: 380,
     prepTime: '4-5 min',
     isPopular: true,
-    isVegetarian: true
+    isVegetarian: true,
+    isAvailable: true
   },
   {
     id: 's2',
@@ -375,7 +399,8 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     prepTime: '5-7 min',
     spicyLevel: 1,
     isPopular: false,
-    isVegetarian: false
+    isVegetarian: false,
+    isAvailable: true
   },
   {
     id: 's3',
@@ -388,6 +413,7 @@ export const INITIAL_MENU_ITEMS: MenuItem[] = [
     calories: 310,
     prepTime: '3-4 min',
     isPopular: false,
-    isVegetarian: true
+    isVegetarian: true,
+    isAvailable: true
   }
 ];

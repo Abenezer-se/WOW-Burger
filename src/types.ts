@@ -37,4 +37,4 @@ export interface CommentFeedback {
 
 export type AppView = 'user-menu' | 'user-detail' | 'admin' | 'contact' | 'favorites';
 
-export type AdminSection = 'dashboard' | 'menu-items' | 'categories' | 'feedbacks';
+export type AdminSection = 'dashboard' | 'menu-items' | 'categories' | 'feedbacks' | 'qr-code' | 'insights';

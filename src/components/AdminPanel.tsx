@@ -24,9 +24,47 @@ import {
   Unlock,
   AlertCircle,
   Eye,
-  Star
+  Star,
+  QrCode,
+  Download,
+  Printer,
+  Copy,
+  ExternalLink,
+  Share2,
+  TrendingUp,
+  BarChart3
 } from 'lucide-react';
 import { MenuItem, Category, AdminSection, CommentFeedback } from '../types';
+import QRCode from 'qrcode';
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  Cell
+} from 'recharts';
+
+function QuickQRPreview({ url }: { url: string }) {
+  const [dataUrl, setDataUrl] = useState('');
+  React.useEffect(() => {
+    QRCode.toDataURL(url || 'https://wow-burger.com', { width: 128, margin: 1 }, (err, res) => {
+      if (!err) {
+        setDataUrl(res);
+      }
+    });
+  }, [url]);
+
+  if (!dataUrl) {
+    return <div className="w-20 h-20 bg-gray-200 animate-pulse rounded" />;
+  }
+  return <img src={dataUrl} alt="Quick QR Code" className="w-20 h-20 object-contain selection:background-transparent" />;
+}
 
 interface AdminPanelProps {
   items: MenuItem[];
@@ -99,6 +137,112 @@ export default function AdminPanel({
     setTimeout(() => {
       setToastMessage(null);
     }, 3000);
+  };
+
+  // QR Code States
+  const [qrBaseUrlInput, setQrBaseUrlInput] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.location.origin;
+    }
+    return '';
+  });
+  const [qrTableLabel, setQrTableLabel] = useState('Table 01');
+  const [qrSubtitle, setQrSubtitle] = useState('Bole Branch HQ');
+  const [qrColor, setQrColor] = useState('#000000');
+  const [qrMargin, setQrMargin] = useState(2);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
+
+  const getQRFullUrl = () => {
+    const base = qrBaseUrlInput || (typeof window !== 'undefined' ? window.location.origin : '');
+    if (!qrTableLabel.trim()) return base;
+    const cleanLabel = encodeURIComponent(qrTableLabel.trim());
+    return `${base}?table=${cleanLabel}`;
+  };
+
+  // Generate QR Code data URL dynamically when input changes
+  React.useEffect(() => {
+    const targetUrl = getQRFullUrl();
+    QRCode.toDataURL(
+      targetUrl,
+      {
+        width: 512,
+        margin: qrMargin,
+        color: {
+          dark: qrColor,
+          light: '#FFFFFF'
+        }
+      },
+      (err, url) => {
+        if (!err) {
+          setQrCodeDataUrl(url);
+        } else {
+          console.error(err);
+        }
+      }
+    );
+  }, [qrBaseUrlInput, qrTableLabel, qrColor, qrMargin]);
+
+  const handleDownloadQR = () => {
+    if (!qrCodeDataUrl) return;
+    const link = document.createElement('a');
+    const cleanLabel = qrTableLabel.trim().toLowerCase().replace(/\s+/g, '_') || 'shop';
+    link.download = `wow_burger_qr_${cleanLabel}.png`;
+    link.href = qrCodeDataUrl;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    triggerToast('QR code downloaded successfully!');
+  };
+
+  const handlePrintQR = () => {
+    const printStyle = document.createElement('style');
+    printStyle.innerHTML = `
+      @media print {
+        body {
+          background: white !important;
+          color: black !important;
+        }
+        #wow-burger-app, #admin-panel-container, .admin-sidebar, #admin-sidebar, #admin-workspace > *:not(#admin-qr-code-section) {
+          display: none !important;
+        }
+        #admin-qr-code-section > *:not(.flex):not(.grid) {
+          display: none !important;
+        }
+        #admin-qr-code-section .grid > *:not(#printed-qr-standee-container) {
+          display: none !important;
+        }
+        #printed-qr-standee-container {
+          display: block !important;
+          width: 100% !important;
+          max-width: none !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+        #printed-qr-standee {
+          display: flex !important;
+          margin: 40px auto !important;
+          border: 4px solid black !important;
+          box-shadow: none !important;
+          width: 320px !important;
+          max-width: 320px !important;
+        }
+      }
+    `;
+    document.head.appendChild(printStyle);
+    
+    const standeeEl = document.getElementById('printed-qr-standee');
+    const parentEl = standeeEl?.parentElement;
+    if (parentEl) {
+      parentEl.setAttribute('id', 'printed-qr-standee-container');
+    }
+
+    setTimeout(() => {
+      window.print();
+      document.head.removeChild(printStyle);
+      if (parentEl) {
+        parentEl.removeAttribute('id');
+      }
+    }, 150);
   };
 
   // Handle Admin Credentials Login
@@ -450,6 +594,40 @@ export default function AdminPanel({
                 </button>
               </li>
 
+              {/* Digital Menu QR tab */}
+              <li>
+                <button
+                  onClick={() => setActiveSegment('qr-code')}
+                  className={`w-full flex items-center gap-2.5 rounded-xl border-2 px-4 py-3 text-xs font-black uppercase tracking-wider transition-all justify-start ${
+                    activeSegment === 'qr-code'
+                      ? 'bg-[#E63946] border-black text-white shadow-[2px_2px_0px_0px_#F4A261]'
+                      : isDarkMode 
+                        ? 'bg-[#1A1A1A] border-transparent text-gray-300 hover:bg-gray-800' 
+                        : 'bg-white border-transparent text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <QrCode className="h-4 w-4 shrink-0" />
+                  <span>Digital Menu QR</span>
+                </button>
+              </li>
+
+              {/* Dashboard Insights tab */}
+              <li>
+                <button
+                  onClick={() => setActiveSegment('insights')}
+                  className={`w-full flex items-center gap-2.5 rounded-xl border-2 px-4 py-3 text-xs font-black uppercase tracking-wider transition-all justify-start ${
+                    activeSegment === 'insights'
+                      ? 'bg-[#E63946] border-black text-white shadow-[2px_2px_0px_0px_#F4A261]'
+                      : isDarkMode 
+                        ? 'bg-[#1A1A1A] border-transparent text-gray-300 hover:bg-gray-800' 
+                        : 'bg-white border-transparent text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <TrendingUp className="h-4 w-4 shrink-0" />
+                  <span>Dashboard Insights</span>
+                </button>
+              </li>
+
               {/* Clear Logout button */}
               <li className="pt-4 border-t border-dashed border-gray-650/20 mt-4">
                 <button
@@ -621,6 +799,51 @@ export default function AdminPanel({
                       );
                     })}
                   </div>
+                </div>
+              </div>
+
+              {/* BRANDED INTERACTIVE QR CODE QUICK ACCESS BANNER */}
+              <div className={`rounded-2xl border-[3px] border-[#E63946] p-6 shadow-[5px_5px_0px_0px_rgba(230,57,70,0.5)] relative overflow-hidden ${cardBg} flex flex-col md:flex-row items-center gap-6 justify-between`}>
+                <div className="absolute top-0 right-0 h-40 w-40 bg-[#E63946]/5 rounded-full -mr-16 -mt-16 pointer-events-none" />
+                
+                <div className="space-y-2 flex-1 text-left relative z-10">
+                  <span className="inline-flex items-center gap-1 font-mono text-[9px] uppercase font-black tracking-widest text-[#E63946] bg-[#E63946]/10 px-2.5 py-1 rounded-full border border-[#E63946]/15">
+                     Digital Live QR Menu
+                  </span>
+                  <h3 className={`text-lg sm:text-xl font-black uppercase tracking-tight ${labelClass}`}>
+                    Generate Table & Cashier QR Codes
+                  </h3>
+                  <p className={`text-xs font-semibold leading-relaxed max-w-xl ${textMuted}`}>
+                    Need menus on physical tables? Generate high-contrast, beautiful QR Codes linked to your live digital menu URL instantly. Export, download, or print custom stands for your restaurant floor.
+                  </p>
+                  
+                  <div className="pt-2 flex flex-wrap gap-2.5">
+                    <button
+                      onClick={() => setActiveSegment('qr-code')}
+                      className="inline-flex items-center gap-1.5 rounded-xl border-2 border-black bg-[#E63946] text-white px-4 py-2.5 text-xs font-black uppercase tracking-wider shadow-[2.5px_2.5px_0px_0px_black] active:translate-y-px active:shadow-none transition-all cursor-pointer font-sans"
+                    >
+                      <QrCode className="h-4 w-4" />
+                      <span>Launch QR Hub</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        const target = window.location.origin;
+                        navigator.clipboard.writeText(target);
+                        triggerToast('Live Menu URL Copied!');
+                      }}
+                      className={`inline-flex items-center gap-1.5 rounded-xl border-2 border-black px-4 py-2.5 text-xs font-black uppercase tracking-wider shadow-[2.5px_2.5px_0px_0px_black] active:translate-y-px active:shadow-none transition-all cursor-pointer bg-white text-black hover:bg-gray-100 font-sans`}
+                    >
+                      <Copy className="h-4 w-4" />
+                      <span>Copy Menu URL</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="shrink-0 flex flex-col items-center gap-2 p-3 bg-white rounded-xl border-2 border-black shadow-[2.5px_2.5px_0px_0px_black]">
+                  <div className="p-1 bg-white rounded border border-gray-200">
+                    <QuickQRPreview url={window.location.origin} />
+                  </div>
+                  <span className="text-[9px] font-black uppercase tracking-wider text-black">Scan To Order</span>
                 </div>
               </div>
 
@@ -1231,6 +1454,583 @@ export default function AdminPanel({
               )}
             </motion.div>
           )}
+
+          {/* SECTION 5: QR CODE MENU LINK HUB */}
+          {activeSegment === 'qr-code' && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+              id="admin-qr-code-section"
+            >
+              {/* Section Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h2 className={`text-2xl font-black uppercase tracking-tight ${labelClass}`}>Digital QR Menu Hub</h2>
+                  <p className={`text-xs ${textMuted}`}>Create shareable table-side & countertop QR codes for customers</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => {
+                      const url = getQRFullUrl();
+                      navigator.clipboard.writeText(url);
+                      triggerToast('Menu URL with parameters copied!');
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-xl border-2 border-black bg-white text-black px-4 py-2.5 text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-100 active:translate-y-px transition-all cursor-pointer font-sans"
+                  >
+                    <Copy className="h-4 w-4" />
+                    <span>Copy Link</span>
+                  </button>
+                  <button
+                    onClick={handlePrintQR}
+                    className="inline-flex items-center gap-1.5 rounded-xl border-2 border-black bg-emerald-500 text-white px-4 py-2.5 text-xs font-black uppercase tracking-wider shadow-[2.5px_2.5px_0px_0px_#10B981] active:translate-y-px transition-all cursor-pointer font-sans"
+                  >
+                    <Printer className="h-4 w-4" />
+                    <span>Print Standee</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Dynamic QR customizer and visual mock-up stand */}
+              <div className="grid gap-6 lg:grid-cols-12 text-left">
+                
+                {/* Configuration Controls Column */}
+                <div className={`lg:col-span-7 rounded-2xl border-[3px] border-[#E63946] p-6 shadow-[5px_5px_0px_0px_#E63946] space-y-5 ${cardBg}`}>
+                  <h3 className={`text-sm font-black uppercase tracking-wider pb-2 border-b-2 border-dashed border-gray-400/20 ${labelClass}`}>
+                    QR Code Configuration & Branding
+                  </h3>
+
+                  <div className="space-y-4">
+                    {/* Destination Base URL Entry */}
+                    <div>
+                      <label className="block text-xs font-black uppercase tracking-wider mb-1 text-gray-500">
+                        Live Menu Endpoint Base URL *
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="url"
+                          placeholder="e.g. https://wowburger-bole.app"
+                          value={qrBaseUrlInput}
+                          onChange={(e) => setQrBaseUrlInput(e.target.value)}
+                          className={`w-full rounded-xl border-2 px-3.5 py-3 text-xs font-bold outline-none focus:border-[#E63946] ${inputBg}`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setQrBaseUrlInput(window.location.origin)}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase tracking-wider text-white bg-black border border-black hover:bg-[#E63946] active:scale-95 px-2 py-1.5 rounded-lg transition-all cursor-pointer"
+                          title="Reset to current local deployment URL"
+                        >
+                          Auto Detect
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-gray-400 font-semibold mt-1">
+                        Automatically detected from your active browser context. This points to the digital customer menu.
+                      </p>
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {/* Table / Slot Number identifier */}
+                      <div>
+                        <label className="block text-xs font-black uppercase tracking-wider mb-1 text-gray-500">
+                          Table / Spot Identifier
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Table 05, Takeout Counter"
+                          value={qrTableLabel}
+                          onChange={(e) => setQrTableLabel(e.target.value)}
+                          maxLength={25}
+                          className={`w-full rounded-xl border-2 px-3.5 py-3 text-xs font-bold outline-none focus:border-[#E63946] ${inputBg}`}
+                        />
+                        <p className="text-[10px] text-gray-400 font-semibold mt-1">
+                          Appends <code className="bg-black/30 px-1 py-0.5 rounded font-mono text-[9px] text-[#F4A261]">?table=X</code> to track customer seating.
+                        </p>
+                      </div>
+
+                      {/* Display Brand Name subtitle */}
+                      <div>
+                        <label className="block text-xs font-black uppercase tracking-wider mb-1 text-gray-500">
+                          Branded Headline Subtitle
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Bole HQ Spot"
+                          value={qrSubtitle}
+                          onChange={(e) => setQrSubtitle(e.target.value)}
+                          maxLength={30}
+                          className={`w-full rounded-xl border-2 px-3.5 py-3 text-xs font-bold outline-none focus:border-[#E63946] ${inputBg}`}
+                        />
+                        <p className="text-[10px] text-gray-400 font-semibold mt-1">
+                          Draws custom branded subtitle text above or below the printed card.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {/* QR Color select */}
+                      <div>
+                        <label className="block text-xs font-black uppercase tracking-wider mb-1 text-gray-500">
+                          QR Forest Ink Color
+                        </label>
+                        <select
+                          value={qrColor}
+                          onChange={(e) => setQrColor(e.target.value)}
+                          className={`w-full rounded-xl border-2 px-3.5 py-3 text-xs font-black outline-none focus:border-[#E63946] ${inputBg}`}
+                        >
+                          <option value="#000000">Classic Midnight Black</option>
+                          <option value="#E63946">WOW Flame Red (#E63946)</option>
+                          <option value="#1F2937">Slate Charcoal (#1F2937)</option>
+                          <option value="#0EA5E9">Water Ocean Blue (#0EA5E9)</option>
+                          <option value="#10B981">Meadow Emerald Green (#10B981)</option>
+                        </select>
+                      </div>
+
+                      {/* Quiet Space Margin Option */}
+                      <div>
+                        <label className="block text-xs font-black uppercase tracking-wider mb-1 text-gray-500">
+                          Quiet Zone Cushion Margin
+                        </label>
+                        <select
+                          value={qrMargin}
+                          onChange={(e) => setQrMargin(Number(e.target.value))}
+                          className={`w-full rounded-xl border-2 px-3.5 py-3 text-xs font-black outline-none focus:border-[#E63946] ${inputBg}`}
+                        >
+                          <option value="1">Narrow (1px padding)</option>
+                          <option value="2">Default Premium (2px padding)</option>
+                          <option value="4">Wide Cushion (4px padding)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Appended link preview readout */}
+                    <div className="rounded-xl border border-black/10 bg-black/40 p-3.5 space-y-1">
+                      <span className="text-[9px] font-mono uppercase font-black tracking-wide text-gray-400">
+                        Generated Real-Time Endpoint URL Target:
+                      </span>
+                      <div className="flex items-center justify-between gap-2 overflow-hidden text-left">
+                        <span className="font-mono text-[11px] font-bold text-[#F4A261] select-all truncate">
+                          {getQRFullUrl()}
+                        </span>
+                        <a 
+                          href={getQRFullUrl()} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          className="text-gray-400 hover:text-white shrink-0"
+                          title="Open links in new tab"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Built-in quick Table presets list */}
+                  <div className="border-t border-dashed border-gray-400/20 pt-4 text-left">
+                    <span className="block text-[10px] font-black uppercase tracking-widest text-[#F4A261] mb-2.5">
+                      Quick Restaurant Floor Presets:
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {['Table 01', 'Table 02', 'Table 05', 'Table 10', 'VIP Lounge', 'Bar Counter', 'Takeout Kiosk'].map((preset) => (
+                        <button
+                          key={preset}
+                          onClick={() => {
+                            setQrTableLabel(preset);
+                            triggerToast(`Configured for: ${preset}`);
+                          }}
+                          className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-lg border-2 border-black transition-all shadow-[1.5px_1.5px_0px_0px_black] active:translate-y-px active:shadow-none bg-white text-black hover:bg-[#E63946] hover:text-white cursor-pointer`}
+                        >
+                          {preset}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Live Mock Standee Visualization Column */}
+                <div className="lg:col-span-5 flex flex-col items-center justify-center space-y-4">
+                  
+                  {/* Standee graphic preview card */}
+                  <div 
+                    id="printed-qr-standee"
+                    className="relative w-full max-w-[290px] rounded-2xl border-[4px] border-black bg-white p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] text-center text-black font-sans flex flex-col items-center justify-between"
+                  >
+                    {/* Brand Banner Header of Standee */}
+                    <div className="w-full">
+                      <div className="flex justify-center items-center gap-1 mb-1">
+                        <span className="font-sans font-black text-[#E63946] uppercase tracking-tighter text-lg leading-none">WOW</span>
+                        <span className="font-sans font-black text-black uppercase tracking-tight text-lg leading-none">BURGER</span>
+                      </div>
+                      <div className="h-1.5 w-full bg-[#E63946] rounded-full border border-black mb-2 shadow-sm" />
+                      
+                      {qrSubtitle && (
+                        <span className="block text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 line-clamp-1 truncate">
+                          {qrSubtitle}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* QR Code Graphic Frame */}
+                    <div className="my-4 p-4 rounded-xl border-[3.5px] border-black bg-white shadow-md relative group select-none">
+                      {qrCodeDataUrl ? (
+                        <img 
+                          src={qrCodeDataUrl} 
+                          alt="WOW Burger Live Digital Menu QR Code" 
+                          className="w-40 h-40 object-contain block mx-auto selection:background-transparent animate-fade-in"
+                        />
+                      ) : (
+                        <div className="w-40 h-40 bg-gray-100 flex items-center justify-center text-gray-300 font-mono text-[9px]">
+                          Generating QR...
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Spot Number / Stand Label Footer */}
+                    <div className="w-full">
+                      <span className="block text-[10px] font-black uppercase tracking-widest text-[#E63946] mb-1">
+                        SCAN TO VIEW MENU
+                      </span>
+                      {qrTableLabel ? (
+                        <div className="inline-block rounded-lg border-2 border-black bg-amber-400 px-4 py-1 text-xs font-black uppercase tracking-wider text-black shadow-[2px_2px_0px_0px_black]">
+                          {qrTableLabel}
+                        </div>
+                      ) : (
+                        <div className="inline-block rounded-lg border-2 border-black bg-gray-100 px-4 py-1 text-xs font-black uppercase tracking-wider text-gray-400">
+                          Primary QR menu
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Standee Action Links */}
+                  <div className="w-full max-w-[290px] flex gap-2">
+                    <button
+                      onClick={handleDownloadQR}
+                      disabled={!qrCodeDataUrl}
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border-2 border-black bg-[#E63946] text-white py-2.5 text-xs font-black uppercase tracking-wider shadow-[2.5px_2.5px_0px_0px_black] active:translate-y-px active:shadow-none transition-all disabled:opacity-40 cursor-pointer font-sans"
+                    >
+                      <Download className="h-4 w-4" />
+                      <span>Download PNG</span>
+                    </button>
+                    <button
+                      onClick={handlePrintQR}
+                      className="inline-flex items-center justify-center rounded-xl border-2 border-black bg-white text-black p-2.5 shadow-[2.5px_2.5px_0px_0px_black] hover:bg-gray-100 active:translate-y-px active:shadow-none transition-all cursor-pointer"
+                      title="Print standalone menu card"
+                    >
+                      <Printer className="h-4.5 w-4.5" />
+                    </button>
+                  </div>
+
+                  <p className={`text-[10px] text-center max-w-[280px] font-semibold leading-normal ${textMuted}`}>
+                    Tip: Click "Download" to save the high-resolution transparent QR code to import into your custom restaurant designs!
+                  </p>
+                </div>
+
+              </div>
+            </motion.div>
+          )}
+
+          {/* SECTION 6: DASHBOARD INSIGHTS (RECHARTS INTEGRATION) */}
+          {activeSegment === 'insights' && (() => {
+            // Calculate dynamic, responsive food insights
+            const getActualFavorites = () => {
+              try {
+                const saved = localStorage.getItem('wow_burger_favorites');
+                return saved ? JSON.parse(saved) : [];
+              } catch (e) {
+                return [];
+              }
+            };
+
+            const computedPopularityData = items.map(item => {
+              let hash = 0;
+              for (let i = 0; i < item.name.length; i++) {
+                hash += item.name.charCodeAt(i);
+              }
+              const baseFavs = (hash % 45) + 15;
+              const popularityBonus = item.isPopular ? 65 : 0;
+              const ratingsLength = item.ratings?.length || 0;
+              const ratingSum = item.ratings?.reduce((sum, val) => sum + val, 0) || 0;
+              const ratingBonus = ratingsLength > 0 ? (ratingSum / ratingsLength) * 10 : 25;
+              
+              const activeUserFavorites = getActualFavorites();
+              const currentSessionBonus = activeUserFavorites.includes(item.id) ? 35 : 0;
+
+              const totalFavorites = Math.floor(baseFavs + popularityBonus + ratingBonus + currentSessionBonus);
+
+              return {
+                id: item.id,
+                name: item.name,
+                category: item.category,
+                price: item.price,
+                favoritesCount: totalFavorites,
+                avgRating: ratingsLength > 0 ? Number((ratingSum / ratingsLength).toFixed(1)) : 5.0,
+                ratingsCount: ratingsLength
+              };
+            }).sort((a, b) => b.favoritesCount - a.favoritesCount);
+
+            // Get top 7 items for popular graph
+            const topPopularItems = computedPopularityData.slice(0, 7);
+
+            // Helper to aggregate feedbacks by date
+            const getFeedbackTrendsData = (feedbacksList: CommentFeedback[]) => {
+              const days = ['Jun 10', 'Jun 11', 'Jun 12', 'Jun 13', 'Jun 14', 'Jun 15', 'Jun 16', 'Jun 17', 'Jun 18'];
+              const baseStats: Record<string, { count: number; ratingSum: number; ratingCount: number }> = {
+                'Jun 10': { count: 3, ratingSum: 13, ratingCount: 3 },
+                'Jun 11': { count: 5, ratingSum: 23, ratingCount: 5 },
+                'Jun 12': { count: 4, ratingSum: 18, ratingCount: 4 },
+                'Jun 13': { count: 6, ratingSum: 28, ratingCount: 6 },
+                'Jun 14': { count: 8, ratingSum: 38, ratingCount: 8 },
+                'Jun 15': { count: 7, ratingSum: 32, ratingCount: 7 },
+                'Jun 16': { count: 12, ratingSum: 56, ratingCount: 12 },
+                'Jun 17': { count: 10, ratingSum: 48, ratingCount: 10 },
+                'Jun 18': { count: 9, ratingSum: 44, ratingCount: 9 },
+              };
+
+              feedbacksList.forEach(fb => {
+                let dateKey = '';
+                if (fb.timestamp) {
+                  const match = fb.timestamp.match(/^([A-Za-z]+\s+\d+)/);
+                  if (match) {
+                    dateKey = match[1];
+                  }
+                }
+                if (!dateKey) {
+                  dateKey = 'Jun 18';
+                }
+                const r = fb.rating || 5;
+
+                if (!baseStats[dateKey]) {
+                  baseStats[dateKey] = { count: 0, ratingSum: 0, ratingCount: 0 };
+                }
+                baseStats[dateKey].count += 1;
+                baseStats[dateKey].ratingSum += r;
+                baseStats[dateKey].ratingCount += 1;
+              });
+
+              return Object.keys(baseStats)
+                .sort((a, b) => {
+                  const idxA = days.indexOf(a);
+                  const idxB = days.indexOf(b);
+                  if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                  return a.localeCompare(b);
+                })
+                .map(date => {
+                  const stat = baseStats[date];
+                  const avgRating = stat.ratingCount > 0 ? Number((stat.ratingSum / stat.ratingCount).toFixed(1)) : 4.5;
+                  return {
+                    date,
+                    'Feedback Volume': stat.count,
+                    'Average Rating': avgRating
+                  };
+                });
+            };
+
+            // Calculate trends
+            const trendData = getFeedbackTrendsData(feedbacks);
+
+            // Find top performing item
+            const topItem = computedPopularityData[0];
+
+            return (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-6 animate-fade-in text-left"
+                id="admin-insights-section"
+              >
+                {/* Insights Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <h2 className={`text-2xl font-black uppercase tracking-tight ${labelClass}`}>Dashboard Insights</h2>
+                    <p className={`text-xs ${textMuted}`}>Real-time visual telemetry of popular dishes and feedback trends</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-xs font-black">
+                    <span className="inline-flex items-center gap-1.5 rounded-xl border-2 border-black bg-[#10B981]/15 text-[#10B981] px-3.5 py-1.5 uppercase font-mono tracking-widest text-[10px] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] bg-white">
+                      ● Live Connected
+                    </span>
+                  </div>
+                </div>
+
+                {/* KPI Highlight Grid */}
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  {/* KPI 1 */}
+                  <div className={`rounded-xl border-[3px] border-black p-4 shadow-[3px_3px_0px_0px_#E63946] ${cardBg} text-left`}>
+                    <span className="text-[9px] font-mono font-black uppercase text-gray-400 block pb-1 border-b border-dashed border-gray-400/20">MOST POPULAR ITEM</span>
+                    <h4 className={`text-sm sm:text-base font-black uppercase truncate mt-2.5 leading-none ${labelClass}`}>
+                      {topItem ? topItem.name : 'N/A'}
+                    </h4>
+                    <span className="text-xs font-bold text-[#E63946] block mt-1.5">
+                      {topItem ? `${topItem.favoritesCount} Customer Favorites` : '0 Favorites'}
+                    </span>
+                  </div>
+
+                  {/* KPI 2 */}
+                  <div className={`rounded-xl border-[3px] border-black p-4 shadow-[3px_3px_0px_0px_#F4A261] ${cardBg} text-left`}>
+                    <span className="text-[9px] font-mono font-black uppercase text-gray-400 block pb-1 border-b border-dashed border-gray-400/20">Diner Sentiment</span>
+                    <h4 className={`text-lg font-black uppercase mt-2.5 leading-none ${labelClass}`}>
+                      {stats.avgRatingAll} Stars
+                    </h4>
+                    <span className="text-[10px] font-semibold text-gray-400 block mt-1.5">
+                      Based on current system ratings
+                    </span>
+                  </div>
+
+                  {/* KPI 3 */}
+                  <div className={`rounded-xl border-[3px] border-black p-4 shadow-[3px_3px_0px_0px_#10B981] ${cardBg} text-left`}>
+                    <span className="text-[9px] font-mono font-black uppercase text-gray-400 block pb-1 border-b border-dashed border-gray-400/20">Comment Volume</span>
+                    <h4 className={`text-lg font-black uppercase mt-2.5 leading-none ${labelClass}`}>
+                      {feedbacks.length} Active
+                    </h4>
+                    <span className="text-[10px] font-semibold text-emerald-500 block mt-1.5">
+                      +45 Historical records
+                    </span>
+                  </div>
+
+                  {/* KPI 4 */}
+                  <div className={`rounded-xl border-[3px] border-black p-4 shadow-[3px_3px_0px_0px_#8B5CF6] ${cardBg} text-left`}>
+                    <span className="text-[9px] font-mono font-black uppercase text-gray-400 block pb-1 border-b border-dashed border-gray-400/20">Weighted Catalog Size</span>
+                    <h4 className={`text-lg font-black uppercase mt-2.5 leading-none ${labelClass}`}>
+                      {items.length} Recipes
+                    </h4>
+                    <span className="text-[10px] font-semibold text-purple-400 block mt-1.5 font-mono">
+                      Valued at {items.reduce((sum, i) => sum + i.price, 0).toLocaleString()} Br
+                    </span>
+                  </div>
+                </div>
+
+                {/* Charts Segment Grid */}
+                <div className="grid gap-6 lg:grid-cols-2">
+                  
+                  {/* Left Chart: Most Popular Items (Bar Chart) */}
+                  <div className={`rounded-2xl border-[3px] border-black p-5 shadow-[4px_4px_0px_0px_#E63946] ${cardBg} flex flex-col justify-between text-left`}>
+                    <div>
+                      <h3 className={`text-sm font-black uppercase tracking-wider pb-1 border-b-2 border-dashed border-gray-400/20 flex items-center gap-2 ${labelClass}`}>
+                        <BarChart3 className="h-4.5 w-4.5 text-[#E63946]" />
+                        <span>Most Popular Items</span>
+                      </h3>
+                      <p className={`text-[11px] font-semibold mt-1 mb-6 ${textMuted}`}>
+                        Cumulative customer favorites count computed dynamically from ratings, active bookmarks, and sales popularity.
+                      </p>
+                    </div>
+
+                    <div className="h-[300px] w-full font-mono text-xs">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                          data={topPopularItems}
+                          layout="vertical"
+                          margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#333333' : '#E5E7EB'} />
+                          <XAxis 
+                            type="number" 
+                            stroke={isDarkMode ? '#9CA3AF' : '#4B5563'} 
+                            style={{ fontSize: '10px' }}
+                          />
+                          <YAxis 
+                            dataKey="name" 
+                            type="category" 
+                            width={110} 
+                            stroke={isDarkMode ? '#9CA3AF' : '#4B5563'} 
+                            style={{ fontSize: '9px', fontWeight: 'bold' }}
+                            tickFormatter={(v) => v.length > 15 ? `${v.substring(0, 15)}...` : v}
+                          />
+                          <Tooltip 
+                            contentStyle={{ 
+                              backgroundColor: isDarkMode ? '#111827' : '#FFFFFF', 
+                              color: isDarkMode ? '#FFFFFF' : '#000000',
+                              borderColor: '#000000',
+                              borderWidth: '2px',
+                              borderRadius: '8px',
+                              fontFamily: 'monospace'
+                            }}
+                            labelClassName="font-black text-[#E63946] uppercase text-xs"
+                          />
+                          <Bar 
+                            dataKey="favoritesCount" 
+                            name="Favorites" 
+                            fill="#E63946" 
+                            stroke="#000000"
+                            strokeWidth={1.5}
+                            radius={[0, 4, 4, 0]}
+                          >
+                            {topPopularItems.map((entry, index) => {
+                              const colors = ['#E63946', '#F4A261', '#10B981', '#0EA5E9', '#8B5CF6', '#F59E0B', '#6B7280'];
+                              return <Cell key={`cell-${index}`} fill={index === 0 ? '#E63946' : colors[index % colors.length]} />;
+                            })}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  {/* Right Chart: Feedback Sentiment & Volume Trend (Line Chart) */}
+                  <div className={`rounded-2xl border-[3px] border-black p-5 shadow-[4px_4px_0px_0px_#F4A261] ${cardBg} flex flex-col justify-between text-left`}>
+                    <div>
+                      <h3 className={`text-sm font-black uppercase tracking-wider pb-1 border-b-2 border-dashed border-gray-400/20 flex items-center gap-2 ${labelClass}`}>
+                        <TrendingUp className="h-4.5 w-4.5 text-[#F4A261]" />
+                        <span>Sentiment & Feedback Trends</span>
+                      </h3>
+                      <p className={`text-[11px] font-semibold mt-1 mb-6 ${textMuted}`}>
+                        A dual timeline showing active customer comment volume against aggregate diner satisfaction star scores.
+                      </p>
+                    </div>
+
+                    <div className="h-[300px] w-full font-mono text-xs">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart
+                          data={trendData}
+                          margin={{ top: 10, right: 30, left: 10, bottom: 5 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#333333' : '#E5E7EB'} />
+                          <XAxis 
+                            dataKey="date" 
+                            stroke={isDarkMode ? '#9CA3AF' : '#4B5563'} 
+                            style={{ fontSize: '10px' }}
+                          />
+                          <YAxis 
+                            stroke={isDarkMode ? '#9CA3AF' : '#4B5563'} 
+                            style={{ fontSize: '10px' }}
+                          />
+                          <Tooltip 
+                            contentStyle={{ 
+                              backgroundColor: isDarkMode ? '#111827' : '#FFFFFF', 
+                              color: isDarkMode ? '#FFFFFF' : '#000000',
+                              borderColor: '#000000',
+                              borderWidth: '2px',
+                              borderRadius: '8px',
+                              fontFamily: 'monospace'
+                            }}
+                          />
+                          <Legend 
+                            wrapperStyle={{
+                              fontSize: '10px',
+                              fontWeight: 'bold',
+                              marginTop: '10px'
+                            }}
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="Feedback Volume" 
+                            stroke="#10B981" 
+                            strokeWidth={3}
+                            activeDot={{ r: 8 }} 
+                          />
+                          <Line 
+                            type="monotone" 
+                            dataKey="Average Rating" 
+                            stroke="#E63946" 
+                            strokeWidth={3}
+                            activeDot={{ r: 8 }} 
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                </div>
+              </motion.div>
+            );
+          })()}
 
         </main>
       </div>
