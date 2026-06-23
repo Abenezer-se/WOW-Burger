@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ArrowLeft, 
@@ -15,7 +15,9 @@ import {
   Info,
   UtensilsCrossed,
   Star,
-  Heart
+  Heart,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { MenuItem } from '../types';
 
@@ -126,6 +128,40 @@ export default function ItemDetail({
   const [hoverRating, setHoverRating] = useState<number>(0);
   const [justRated, setJustRated] = useState<boolean>(false);
 
+  // Carousel state
+  const carouselImages = item.images && item.images.length > 0 ? item.images : [item.image];
+  const [activeImgIndex, setActiveImgIndex] = useState(0);
+
+  // Trigger server-side view count increment on enter
+  useEffect(() => {
+    const recordView = async () => {
+      try {
+        await fetch(`/api/items/${item.id}/view`, {
+          method: 'POST'
+        });
+      } catch (err) {
+        console.error('Failed to log view count telemetry:', err);
+      }
+    };
+    recordView();
+  }, [item.id]);
+
+  // Reset image carousel index when item changes
+  useEffect(() => {
+    setActiveImgIndex(0);
+  }, [item.id]);
+
+  // Carousel Handlers
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveImgIndex(prev => (prev === 0 ? carouselImages.length - 1 : prev - 1));
+  };
+
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveImgIndex(prev => (prev === carouselImages.length - 1 ? 0 : prev + 1));
+  };
+
   // Calculate average rating
   const userRatings = item.ratings || [];
   const ratingsCount = userRatings.length;
@@ -147,7 +183,7 @@ export default function ItemDetail({
       <div className="mb-6 flex items-center justify-between">
         <button
           onClick={onBack}
-          className={`group flex items-center gap-2 rounded-xl border-2 px-4 py-2 text-xs font-black uppercase tracking-wider transition-all hover:translate-y-px active:scale-95 ${
+          className={`group flex items-center gap-2 rounded-xl border-2 px-4 py-2 text-xs font-black uppercase tracking-wider transition-all hover:translate-y-px active:scale-95 cursor-pointer ${
             isDarkMode 
               ? 'bg-[#1A1A1A] text-white' 
               : 'bg-white text-gray-900'
@@ -170,20 +206,63 @@ export default function ItemDetail({
       } ${theme.border} ${theme.shadow}`}>
         <div className="grid md:grid-cols-2">
           
-          {/* Left: Large Image Container with Shared Layout Animations */}
-          <div className={`relative aspect-square w-full overflow-hidden bg-[#121212] md:h-full border-b-[3px] md:border-b-0 md:border-r-[3px] ${theme.border}`}>
-            <motion.img
-              layoutId={`card-${item.id}`}
-              src={item.image}
-              alt={item.name}
-              referrerPolicy="no-referrer"
-              className="h-full w-full object-cover"
-            />
-            {/* Dark gradients for text legibility */}
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-6 md:hidden" />
+          {/* Left: Interactive Carousel Image Container with Shared Layout Animations */}
+          <div className={`relative aspect-square w-full overflow-hidden bg-[#121212] md:h-full border-b-[3px] md:border-b-0 md:border-r-[3px] ${theme.border}`} id="carousel-media-viewer">
             
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={carouselImages[activeImgIndex]}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                src={carouselImages[activeImgIndex]}
+                alt={`${item.name} slide ${activeImgIndex + 1}`}
+                referrerPolicy="no-referrer"
+                className="h-full w-full object-cover select-none"
+              />
+            </AnimatePresence>
+
+            {/* Carousel Control Chevrons (only visible if more than 1 image) */}
+            {carouselImages.length > 1 && (
+              <>
+                <button
+                  onClick={handlePrevImage}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-lg border-2 border-black bg-white/95 text-black hover:bg-[#E63946] hover:text-white transition-all active:scale-90 shadow-md cursor-pointer"
+                  title="Previous image"
+                >
+                  <ChevronLeft className="h-5 w-5 stroke-[2.5]" />
+                </button>
+                <button
+                  onClick={handleNextImage}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-lg border-2 border-black bg-white/95 text-black hover:bg-[#E63946] hover:text-white transition-all active:scale-90 shadow-md cursor-pointer"
+                  title="Next image"
+                >
+                  <ChevronRight className="h-5 w-5 stroke-[2.5]" />
+                </button>
+              </>
+            )}
+
+            {/* Carousel Dot/Bar Indicators (only if more than 1 image) */}
+            {carouselImages.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                {carouselImages.map((_, dotIdx) => (
+                  <button
+                    key={dotIdx}
+                    onClick={() => setActiveImgIndex(dotIdx)}
+                    className={`h-2 rounded-full border border-black/20 transition-all ${
+                      dotIdx === activeImgIndex 
+                        ? 'w-6 bg-white shadow-md' 
+                        : 'w-2 bg-white/55 hover:bg-white'
+                    }`}
+                    title={`Go to image slide ${dotIdx + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+
             {/* Quick Badges inside Image */}
-            <div className="absolute top-4 left-4 flex flex-col gap-2">
+            <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
               {item.isPopular && (
                 <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#F4A261] border border-black px-3 py-1.5 text-xs font-black uppercase tracking-wider text-white shadow-md">
                   <TrendingUp className="h-3.5 w-3.5" />
@@ -201,7 +280,7 @@ export default function ItemDetail({
             {/* Favorite toggle position inside Image */}
             <button
               onClick={() => onToggleFavorite(item.id)}
-              className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-xl border-2 border-black bg-white/95 text-[#E63946] shadow-md transition-transform duration-200 hover:scale-110 active:scale-95"
+              className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-xl border-2 border-black bg-white/95 text-[#E63946] shadow-md transition-transform duration-200 hover:scale-110 active:scale-95 z-10 cursor-pointer"
               title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
               id={`favorite-toggle-${item.id}`}
             >
@@ -213,7 +292,7 @@ export default function ItemDetail({
             </button>
 
             {/* Price Overlay on Mobile Detail Image */}
-            <div className="absolute bottom-4 right-4 md:hidden">
+            <div className="absolute bottom-4 right-4 md:hidden z-10">
               <span className={`rounded-xl border-2 border-black px-4 py-2 text-lg font-black text-white shadow-md ${theme.badge}`}>
                 {item.price.toFixed(0)} Birr
               </span>
